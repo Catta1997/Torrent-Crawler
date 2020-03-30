@@ -30,7 +30,7 @@ title_box = parsed_html.findAll('td', attrs={'class':'coll-1 name'})
 x = 0
 print("")
 print("")
-print("Torrnet:")
+print("Torrnets:")
 print("")
 for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
     GB.append(dim.text)
@@ -38,18 +38,28 @@ for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
 x = 0
 for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
     print('---------')
-    print('Torrent %d' %x)
+    print('Torrent %d' %x + ":")
     for a in parsed.find_all('a', href=True):
         string_res = (a.text)
         if(string_res != ""):
             line = GB[x]
             dim = line
-            print(string_res)
-            print("DIM: " + split_and_keep(dim, 'B')[0])
+
+#        echo -e "\t\x1b[32mAttempt $i: Success\x1b[0m"
+ #       Success=$((Success + 1))
+#    else
+#        echo -e "\t\x1b[31mAttempt $i: Fail\x1b[0m"#
+#
+
+
+            print("\x1b[36m" + string_res + "\x1b[0m")
+            print("\x1b[32mDIM: " + split_and_keep(dim, 'B')[0]+ "\x1b[0m" )
         if('torrent' in a['href']):
             result.append('https://www.1377x.to' + a['href'])
     x += 1
 print('---------')
 print("")
 number = input('Ins number result:')
-print(result[number])
+print("")
+print("Magnet: \x1b[31;1m" + result[number]+ "\x1b[0m")
+print("")
