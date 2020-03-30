@@ -3,8 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
-name = raw_input('Nome Film da cercare:').strip()
-name = str(name).replace(' ' , '%20')
+name_input = raw_input('Nome Film da cercare:').strip()
+name = str(name_input).replace(' ' , '%20')
 resulst = list()
 GB = list()
 result = ['']
@@ -29,8 +29,8 @@ parsed_html = BeautifulSoup(html,"html.parser")
 title_box = parsed_html.findAll('td', attrs={'class':'coll-1 name'})
 x = 0
 print("")
-print("")
-print("Torrnets:")
+if len(title_box)== 0: print("No torrent founded for \"" + name_input+"\"")
+print("%d" %len(title_box) + " torrents founded for \"" + name_input +"\"")
 print("")
 for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
     GB.append(dim.text)
@@ -38,7 +38,7 @@ for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
 x = 0
 for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
     print('---------')
-    print('Torrent %d' %x + ":")
+    print('Torrent %d' %(x+1) + ":")
     for a in parsed.find_all('a', href=True):
         string_res = (a.text)
         if(string_res != ""):
