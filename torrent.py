@@ -1,11 +1,10 @@
 # importing the requests library 
-import requests 
+import requests
 from bs4 import BeautifulSoup
 
 
 name = raw_input('Nome Film da cercare:').strip()
-name = str(name).replace(' ' , '+')
-print (name)
+name = str(name).replace(' ' , '%20')
 resulst = list()
 GB = list()
 result = ['']
@@ -25,20 +24,21 @@ r = requests.get(url = URL, params = PARAMS)
 pastebin_url = r.text 
 #print("The pastebin URL is:%s"%pastebin_url) 
 html = pastebin_url
-parsed_html = BeautifulSoup(html)
+parsed_html = BeautifulSoup(html,"html.parser")
 
 title_box = parsed_html.findAll('td', attrs={'class':'coll-1 name'})
 x = 0
-
+print("")
+print("")
+print("Torrnet:")
+print("")
 for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
     GB.append(dim.text)
     x+=1
 x = 0
-print("")
-print("")
-print("")
 for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
-    print(x)
+    print('---------')
+    print('Torrent %d' %x)
     for a in parsed.find_all('a', href=True):
         string_res = (a.text)
         if(string_res != ""):
@@ -50,10 +50,6 @@ for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
             result.append('https://www.1377x.to' + a['href'])
     x += 1
 print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
-print('---------')
+print("")
 number = input('Ins number result:')
 print(result[number])
