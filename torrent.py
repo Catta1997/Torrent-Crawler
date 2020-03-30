@@ -29,7 +29,10 @@ parsed_html = BeautifulSoup(html,"html.parser")
 title_box = parsed_html.findAll('td', attrs={'class':'coll-1 name'})
 x = 0
 print("")
-if len(title_box)== 0: print("No torrent founded for \"" + name_input+"\"")
+if len(title_box)== 0: 
+    print("No torrent founded for \"" + name_input+"\"")
+    print("")
+    exit(1)
 print("%d" %len(title_box) + " torrents founded for \"" + name_input +"\"")
 print("")
 for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
@@ -59,7 +62,16 @@ for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
     x += 1
 print('---------')
 print("")
-number = input('Ins number result:')
-print("")
-print("Magnet: \x1b[31;1m" + result[number]+ "\x1b[0m")
-print("")
+found = 0
+while(found == 0):
+    print("")
+    print("")
+    number = input('Choose torrent:')
+    if(number < len(result)):
+        print("")
+        print("Magnet: \x1b[31;1m" + result[number]+ "\x1b[0m")
+        found = 1
+        print("")
+    else : 
+        print("")
+        print("\x1b[31;1mOut of range\x1b[0m")
