@@ -1,5 +1,5 @@
 # importing the requests library 
-import requests,os
+import requests,os,subprocess
 from bs4 import BeautifulSoup
 
 
@@ -79,23 +79,19 @@ for dim in parsed_html.findAll('td', attrs={'class':'coll-4'}):
 x = 0
 
 for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
-    print('---------')
-    print('Torrent %d' %(x+1) + ":")
+    #print('---------')
+    #print('Torrent %d' %(x+1) + ":")
     for a in parsed.find_all('a', href=True):
         string_res = (a.text)
         if(string_res != ""):
             line = GB[x]
             dim = line
-            print("\x1b[36m" + string_res + "\x1b[0m")
-            print("\x1b[32mDIM: " + split_and_keep(dim, 'B')[0]+ "\x1b[0m" )
-            print(a['href'])
+            #print("\x1b[36m" + string_res + "\x1b[0m")
+            #print("\x1b[32mDIM: " + split_and_keep(dim, 'B')[0]+ "\x1b[0m" )
+            #print(a['href'])
         if('torrent' in a['href']):
             result.append('https://www.1377x.to' + a['href'])
     x += 1
-print("")
-print("ordino")
-print("")
-
 x = 0
 for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
     for a in parsed.find_all('a', href=True):
@@ -160,14 +156,18 @@ while(found == 0):
 
 
         print("")
-        print("Magnet: \x1b[31;1m" + magnet_link + "\x1b[0m")
-        print("")
-        print("")
         if(autoadd):
-            if os.system(add_torrent_command + ' ' + magnet_link):
-                print('\x1b[32mSuccess\x1b[0m')
-            else:
-                print("\x1b[31;1mError\x1b[0m")
+            command = add_torrent_command + ' \'' + magnet_link + '\' >&- 2> add_torrent_output.txt'
+            os.system(command)
+            with open('add_torrent_output.txt', 'r') as f:
+                if 'command not found' not in f.read():
+                    print('\x1b[32mSuccess\x1b[0m')
+                else:
+                    print("\x1b[31;1mError, command not found\x1b[0m")
+        else :
+            print("Magnet: \x1b[31;1m" + magnet_link + "\x1b[0m")
+            print("")
+            print("")
         found = 1
         print("")
     else : 
