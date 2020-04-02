@@ -1,9 +1,14 @@
 # importing the requests library 
 import requests,os,subprocess
+import sys
 from bs4 import BeautifulSoup
 
-
-name_input = raw_input('Nome Film da cercare:').strip()
+if len (sys.argv) ==1 :
+    name_input = raw_input('Nome Film da cercare:').strip()
+else :
+    name_input = sys.argv[1]
+    for x in sys.argv[2:]:
+        name_input += ' ' + x
 name = str(name_input).replace(' ' , '%20')
 resulst = list()
 GB = list()
