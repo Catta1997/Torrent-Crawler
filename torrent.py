@@ -16,7 +16,7 @@ result = ['']
 URL = "https://www.1377x.to/category-search/" + name + "/Movies/1/"
 PARAMS = {}
 
-add_torrent_command = 'addtorr'
+add_torrent_command = 'transmission-remote -n transmission:transmission -a'
 autoadd = True
 
 def bubbleSort(arr,arr2,arr3,arr4):
@@ -28,7 +28,11 @@ def bubbleSort(arr,arr2,arr3,arr4):
             # traverse the array from 0 to n-i-1
             # Swap if the element found is greater
             # than the next element
-            if arr[j] > arr[j+1] :
+            arr[j] = arr[j].replace(',', '')
+            arr[j+1] = arr[j+1].replace(',', '')
+            z = float(arr[j])
+            x = float(arr[j+1])
+            if z > x :
                 arr[j], arr[j+1] = arr[j+1], arr[j]
                 arr2[j], arr2[j+1] = arr2[j+1], arr2[j]
                 arr3[j], arr3[j+1] = arr3[j+1], arr3[j]
@@ -44,7 +48,11 @@ def bubbleSort2(arr,arr2):
             # traverse the array from 0 to n-i-1
             # Swap if the element found is greater
             # than the next element
-            if arr[j] > arr[j+1] :
+            arr[j] = arr[j].replace(',', '')
+            arr[j+1] = arr[j+1].replace(',', '')
+            z = float(arr[j])
+            x = float(arr[j+1])
+            if z > x :
                 arr[j], arr[j+1] = arr[j+1], arr[j]
                 arr2[j], arr2[j+1] = arr2[j+1], arr2[j]
 def split_and_keep(s, sep):
@@ -64,7 +72,7 @@ parsed_html = BeautifulSoup(html,"html.parser")
 title_box = parsed_html.findAll('td', attrs={'class':'coll-1 name'})
 x = 0
 print("")
-if len(title_box)== 0: 
+if len(title_box)== 0:
     print("No torrent founded for \"" + name_input+"\"")
     print("")
     exit(1)
@@ -91,9 +99,6 @@ for parsed in parsed_html.findAll('td', attrs={'class':'coll-1 name'}):
         if(string_res != ""):
             line = GB[x]
             dim = line
-            #print("\x1b[36m" + string_res + "\x1b[0m")
-            #print("\x1b[32mDIM: " + split_and_keep(dim, 'B')[0]+ "\x1b[0m" )
-            #print(a['href'])
         if('torrent' in a['href']):
             result.append('https://www.1377x.to' + a['href'])
     x += 1
