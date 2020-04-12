@@ -1,10 +1,5 @@
 # Torrent-Crawler
 
-Require BeautifulSoup
+Require 'BeautifulSoup', 'Bs4' and 'Request'
 
 Usage = `python torrent.py fast and furious`
-
-
-To do :
-
-- add support for other site
