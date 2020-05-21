@@ -1,12 +1,15 @@
 # importing the requests library 
-import requests,sys,os
+import requests,os,subprocess
+import sys
 from bs4 import BeautifulSoup
 
 #config
 torrent_pages = 3
-add_torrent_command = 'aria2c -d /share/Plex/FILM --seed-time=0'
+add_torrent_command = '/share/CACHEDEV1_DATA/.qpkg/QTransmission/bin/transmission-remote -n qnap:qnap -a'
+#aria2c -d ~/Downloads --seed-time=0 "magnet:?xt=urn:btih:248D0A1CD08284299DE78D5C1ED359BB46717D8C"
 autoadd = True
 #end config
+
 
 resulst = list()
 GB = list()
@@ -19,38 +22,8 @@ MB_ord = list()
 name_torrent = list()
 def bubbleSort(arr,arr2,arr3,arr4):
     n = len(arr)
-    # Traverse through all array elements
-    for i in range(n):
-        # Last i elements are already in place
-        for j in range(0, n-i-1):
-            # traverse the array from 0 to n-i-1
-            # Swap if the element found is greater
-            # than the next element
-            arr[j] = arr[j].replace(',', '')
-            arr[j+1] = arr[j+1].replace(',', '')
-            z = float(arr[j])
-            x = float(arr[j+1])
-            if z > x :
-                arr[j], arr[j+1] = arr[j+1], arr[j]
-                arr2[j], arr2[j+1] = arr2[j+1], arr2[j]
-                arr3[j], arr3[j+1] = arr3[j+1], arr3[j]
-                arr4[j], arr4[j+1] = arr4[j+1], arr4[j]
 def bubbleSort2(arr,arr2):
     n = len(arr)
-    # Traverse through all array elements
-    for i in range(n):
-        # Last i elements are already in place
-        for j in range(0, n-i-1):
-            # traverse the array from 0 to n-i-1
-            # Swap if the element found is greater
-            # than the next element
-            arr[j] = arr[j].replace(',', '')
-            arr[j+1] = arr[j+1].replace(',', '')
-            z = float(arr[j])
-            x = float(arr[j+1])
-            if z > x :
-                arr[j], arr[j+1] = arr[j+1], arr[j]
-                arr2[j], arr2[j+1] = arr2[j+1], arr2[j]
 def split_and_keep(s, sep):
     if not s: return ['']
     p=chr(ord(max(s))+1)
@@ -159,18 +132,23 @@ def select():
                         magnet_link = a['href']
             print("")
             found = 1
-            print("\x1b[36mTITLE: " + name_torrent[number] + "\x1b[0m")
-            print("\x1b[32mDIM: " + dim_tot[number]+ "\x1b[0m" )
+            print("\x1b[36mTITLE: " + name_torrent[number-1] + "\x1b[0m")
+            print("\x1b[32mDIM: " + dim_tot[number-1]+ "\x1b[0m" )
+            print('Magnet:\x1b[31;1m ' + magnet_link + "\x1b[0m")
             conf = input("y to confirm, n to repeat: ")
             print("")
             if(conf == 'n' or conf == 'N'):
                 found = 0
             elif(autoadd and (conf == 'y' or conf == 'Y')):
-                command = add_torrent_command + ' \'' + magnet_link
+                command = add_torrent_command + ' \"' + magnet_link + '\" >&- 2> add_torrent_output.txt'
                 os.system(command)
-                print('')
-                print('')
-                print('Magnet:\x1b[31;1m ' + magnet_link + "\x1b[0m")
+                with open('add_torrent_output.txt', 'r') as f:
+                    if 'command not found' not in f.read():
+                        print('\x1b[32mSuccess\x1b[0m' + '\x1b[0m')
+                    else:
+                        print("\x1b[31;1mError, command not found\x1b[0m")
+                        print("")
+                        print('Magnet:\x1b[31;1m ' + magnet_link + "\x1b[0m")
             else :
                 print("Magnet: \x1b[31;1m" + magnet_link + "\x1b[0m")
                 print("")
