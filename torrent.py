@@ -2,6 +2,7 @@
 import json
 import os
 import signal
+import subprocess
 import sys
 import requests
 from bs4 import BeautifulSoup
@@ -132,7 +133,7 @@ class TorrentDownloader():
                 elif(self.autoadd and (conf in ('y', 'Y'))):
                     command = self.add_torrent_command + ' \'' + \
                         magnet_link + '\' >&- 2> add_torrent_output.txt'
-                    os.system(command)
+                    subprocess.call(command)
                     with open('add_torrent_output.txt', 'r') as file:
                         if 'command not found' not in file.read():
                             print('\x1b[32mSuccess\x1b[0m' + '\x1b[0m')
