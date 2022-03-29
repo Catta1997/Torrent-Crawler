@@ -1,5 +1,4 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
-from ast import parse
 import json
 import os
 import signal
@@ -25,20 +24,11 @@ class TorrentDownloader():
     }
     '''
 
-    @classmethod
-    def split_and_keep(cls, name, sep):
-        '''Renove GB/MB from string'''
-        if not name:
-            return ['']
-        pos = chr(ord(max(name))+1)
-        return name.replace(sep, sep+pos).split(pos)
-
     def search1337x(self, req, name_s):
         '''Parsing function'''
         # extracting data in json format
         parsed_html = BeautifulSoup(req.text, "html.parser")
-        title_box = parsed_html.findAll('td', attrs={'class': 'coll-1 name'})
-        if len(title_box) == 0:
+        if len(parsed_html.findAll('td', attrs={'class': 'coll-1 name'})) == 0:
             print("No torrent founded for \"" + name_s+"\"")
             print("")
             sys.exit(1)
@@ -47,27 +37,25 @@ class TorrentDownloader():
             size = "0 "
             seed = ""
             leech = ""
-            for dim in parsed.findAll('td', attrs={'class': 'coll-2'}):
-                seed = (dim.text)
-            for dim in parsed.findAll('td', attrs={'class': 'coll-3'}):
-                leech = (dim.text)
-            for dim in parsed.findAll('td', attrs={'class': 'coll-4'}):
-                size = (dim.text)
+            for elem in parsed.findAll('td', attrs={'class': 'coll-2'}):
+                seed = (elem.text)
+            for elem in parsed.findAll('td', attrs={'class': 'coll-3'}):
+                leech = (elem.text)
+            for elem in parsed.findAll('td', attrs={'class': 'coll-4'}):
+                size = (elem.text)
             title = ""
             link = ""
-            name = parsed.findAll('td', attrs={'class': 'coll-1'})
-            for elem in name:
+            for elem in parsed.findAll('td', attrs={'class': 'coll-1'}):
                 for tit in elem.find_all('a', href=True):
                     link = tit['href']
                     title = tit.text
             if len(title) > 1:
                 temp = {
                     'name': title,
-                    # split_and_keep(dim, ' ')[0],
                     'size': float(size.split(" ")[0]),
                     'seed': seed,
                     'leech': leech,
-                    'type': self.split_and_keep(size, ' ')[-1],
+                    'type': size.split(" ")[1],
                     'link': 'https://www.1377x.to' + link
                 }
 
@@ -106,13 +94,15 @@ class TorrentDownloader():
     def select(self):
         '''Select torrent'''
         print('---------')
-        print("")
         found = 0
         while found == 0:
-            print("")
-            print("")
             item_dict = json.loads(self.json_torrent)
-            number = int(input('Choose torrent:'))
+            try:
+                number = int(input('Choose torrent:'))
+            except ValueError:
+                print("")
+                print("\x1b[31;1mNot Valid!!\x1b[0m")
+                self.select()
             number -= 1  # indice di un array
             if number < len(item_dict['Torrent']):
                 item_dict = json.loads(self.json_torrent)[
@@ -128,7 +118,7 @@ class TorrentDownloader():
                     for elem in parsed.find_all('a', href=True):
                         if 'magnet' in elem['href']:
                             magnet_link = elem['href']
-                print("")
+                print("----------------------------------")
                 found = 1
                 print("\x1b[36mTITLE: " + item_dict['name'] + "\x1b[0m")
                 print("\x1b[32mDIM: " + str(item_dict['size']) +
@@ -136,7 +126,7 @@ class TorrentDownloader():
                 print("\x1b[33mSEED: " + item_dict['seed'] + "\x1b[0m")
                 print("\x1b[37mLEECH: " + item_dict['leech'] + "\x1b[0m")
                 conf = input("y to confirm, n to repeat: ")
-                print("")
+                print("----------------------------------")
                 if conf in ('n', 'N'):
                     found = 0
                 elif(self.autoadd and (conf in ('y', 'Y'))):
@@ -148,14 +138,11 @@ class TorrentDownloader():
                             print('\x1b[32mSuccess\x1b[0m' + '\x1b[0m')
                         else:
                             print("\x1b[31;1mError, command not found\x1b[0m")
-                            print("")
+                            print("----------------------------------")
                             print('Magnet:\x1b[31;1m ' +
                                   magnet_link + "\x1b[0m")
                 else:
                     print("Magnet: \x1b[31;1m" + magnet_link + "\x1b[0m")
-                    print("")
-                    print("")
-                print("")
             else:
                 print("")
                 print("\x1b[31;1mOut of range\x1b[0m")
