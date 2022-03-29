@@ -7,3 +7,9 @@
 Install Python3 and requierements
 
 Usage = `python torrent.py fast and furious`
+
+For QNAP use:
+
+- Install `QTransmission` from `qnapclub.eu`
+- open `/opt/QTransmission/etc/settings.json` 
+- edit `"rpc-port"` to `9091`

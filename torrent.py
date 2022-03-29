@@ -1,4 +1,5 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
+from ast import parse
 import json
 import os
 import signal
@@ -11,15 +12,12 @@ class TorrentDownloader():
     '''Torrent magnet link'''
     # config
     torrent_pages = 3
-    add_torrent_command = 'transmission-remote -n transmission:transmission -a'
+    QNAP = 0
+    add_torrent_command = ['transmission-remote -n transmission:transmission -a',
+                           '/share/CACHEDEV1_DATA/.qpkg/QTransmission/bin/transmission-remote -n qnap:qnap -a'][QNAP]
     autoadd = True
     # end config
 
-    resulst = list()
-    GB = list()
-    result = ['']
-    torrent = 1
-    name_torrent = list()
     json_torrent = '''
     {
         "Torrent": [
@@ -45,36 +43,42 @@ class TorrentDownloader():
             print("")
             sys.exit(1)
         # Get Torrent Size
-        for dim in parsed_html.findAll('td', attrs={'class': 'coll-4'}):
-            self.GB.append(dim.text)
-        # Get torrent info
-        pos = 0
-        for parsed in title_box:
-            for elem in parsed.find_all('a', href=True):
-                string_res = (elem.text)
-                if len(string_res) > 1:
-                    line = self.GB[pos]
-                    dim = line
-                    self.name_torrent.append(string_res)
-                    temp = {
-                        'name': string_res,
-                        # split_and_keep(dim, ' ')[0],
-                        'size': float(dim.split(" ")[0]),
-                        'type': self.split_and_keep(dim, ' ')[-1],
-                        'link': 'https://www.1377x.to' + elem['href']
-                    }
-                    data = json.loads(self.json_torrent)
-                    t_list = data['Torrent']
-                    # print(t_list)
-                    t_list.append(temp)
-                    self.json_torrent = json.dumps(data, indent=4)
-                    sorted_obj = dict(data)
-                    sorted_obj['Torrent'] = sorted(
-                        data['Torrent'], key=lambda pos: pos['size'], reverse=True)
-                    self.json_torrent = json.dumps(sorted_obj, indent=4)
-            pos += 1
-        pos = 0
-        #item_dict = json.loads(TorrentDownloader.json_torrent)
+        for parsed in parsed_html.findAll('tr'):
+            size = "0 "
+            seed = ""
+            leech = ""
+            for dim in parsed.findAll('td', attrs={'class': 'coll-2'}):
+                seed = (dim.text)
+            for dim in parsed.findAll('td', attrs={'class': 'coll-3'}):
+                leech = (dim.text)
+            for dim in parsed.findAll('td', attrs={'class': 'coll-4'}):
+                size = (dim.text)
+            title = ""
+            link = ""
+            name = parsed.findAll('td', attrs={'class': 'coll-1'})
+            for elem in name:
+                for tit in elem.find_all('a', href=True):
+                    link = tit['href']
+                    title = tit.text
+            if len(title) > 1:
+                temp = {
+                    'name': title,
+                    # split_and_keep(dim, ' ')[0],
+                    'size': float(size.split(" ")[0]),
+                    'seed': seed,
+                    'leech': leech,
+                    'type': self.split_and_keep(size, ' ')[-1],
+                    'link': 'https://www.1377x.to' + link
+                }
+
+                data = json.loads(self.json_torrent)
+                t_list = data['Torrent']
+                t_list.append(temp)
+                self.json_torrent = json.dumps(data, indent=4)
+                sorted_obj = dict(data)
+                sorted_obj['Torrent'] = sorted(
+                    data['Torrent'], key=lambda pos: pos['size'], reverse=True)
+                self.json_torrent = json.dumps(sorted_obj, indent=4)
 
     def search1377x_request(self, name_s):
         '''Request to site'''
@@ -85,9 +89,8 @@ class TorrentDownloader():
             req = requests.get(url=url, params={})
             self.search1337x(req, name_s)
 
-    def sort(self):
+    def print_list(self):
         '''Print function'''
-        #x = 0
         torrent = 1
         data = json.loads(self.json_torrent)
         for elem in data['Torrent']:
@@ -96,8 +99,9 @@ class TorrentDownloader():
             print("\x1b[36mTITLE: " + elem['name'] + "\x1b[0m")
             print("\x1b[32mDIM: " + str(elem['size']) +
                   " " + elem['type'] + "\x1b[0m")
+            print("\x1b[33mSEED: " + elem['seed'] + "\x1b[0m")
+            print("\x1b[37mLEECH: " + elem['leech'] + "\x1b[0m")
             torrent += 1
-           # x += 1
 
     def select(self):
         '''Select torrent'''
@@ -119,9 +123,7 @@ class TorrentDownloader():
                 pastebin_url = req.text
                 html = pastebin_url
                 parsed_html = BeautifulSoup(html, "html.parser")
-                #print("The pastebin URL is:%s"%pastebin_url)
                 magnet_link = ''
-                #title_box = parsed_html.findAll('li')
                 for parsed in parsed_html.findAll('li'):
                     for elem in parsed.find_all('a', href=True):
                         if 'magnet' in elem['href']:
@@ -131,11 +133,13 @@ class TorrentDownloader():
                 print("\x1b[36mTITLE: " + item_dict['name'] + "\x1b[0m")
                 print("\x1b[32mDIM: " + str(item_dict['size']) +
                       " " + item_dict['type'] + "\x1b[0m")
+                print("\x1b[33mSEED: " + item_dict['seed'] + "\x1b[0m")
+                print("\x1b[37mLEECH: " + item_dict['leech'] + "\x1b[0m")
                 conf = input("y to confirm, n to repeat: ")
                 print("")
                 if conf in ('n', 'N'):
                     found = 0
-                elif(self.autoadd and (conf in ('n', 'N'))):
+                elif(self.autoadd and (conf in ('y', 'Y'))):
                     command = self.add_torrent_command + ' \'' + \
                         magnet_link + '\' >&- 2> add_torrent_output.txt'
                     os.system(command)
@@ -167,7 +171,7 @@ class TorrentDownloader():
                 name_input += ' ' + elem
         name = str(name_input).replace(' ', '%20')
         self.search1377x_request(name)
-        self.sort()
+        self.print_list()
         self.select()
 
     @classmethod

@@ -1,1 +1,0 @@
-sh: transmission-remote: command not found
