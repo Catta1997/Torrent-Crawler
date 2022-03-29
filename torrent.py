@@ -1,6 +1,5 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
 import json
-import os
 import signal
 import subprocess
 import sys
