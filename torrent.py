@@ -12,8 +12,8 @@ class TorrentDownloader():
     # config
     torrent_pages = 3
     QNAP = 0
-    add_torrent_command = ['transmission-remote -n transmission:transmission -a',
-                           '/share/CACHEDEV1_DATA/.qpkg/QTransmission/bin/transmission-remote -n qnap:qnap -a'][QNAP]
+    cmd_command = [['/share/CACHEDEV1_DATA/.qpkg/QTransmission/bin/transmission-remote', '-n',
+                    'qnap:qnap', '-a'], ['transmission-remote', '-n', 'transmission:transmission', '-a']][QNAP]
     autoadd = True
     # end config
 
@@ -130,17 +130,20 @@ class TorrentDownloader():
                 if conf in ('n', 'N'):
                     found = 0
                 elif(self.autoadd and (conf in ('y', 'Y'))):
-                    command = self.add_torrent_command + ' \'' + \
-                        magnet_link + '\' >&- 2> add_torrent_output.txt'
-                    subprocess.call(command, shell=True)
-                    with open('add_torrent_output.txt', 'r') as file:
-                        if 'command not found' not in file.read():
-                            print('\x1b[32mSuccess\x1b[0m' + '\x1b[0m')
-                        else:
-                            print("\x1b[31;1mError, command not found\x1b[0m")
-                            print("----------------------------------")
-                            print('Magnet:\x1b[31;1m ' +
-                                  magnet_link + "\x1b[0m")
+                    self.cmd_command.append(magnet_link)
+                    result = 'def'
+                    try:
+                        result = subprocess.call(
+                            x, stdout=subprocess.PIPE, shell=False)
+                    except FileNotFoundError:
+                        pass
+                    if result not in ('command not found', 'def'):
+                        print('\x1b[32mSuccess\x1b[0m' + '\x1b[0m')
+                    else:
+                        print("\x1b[31;1mError, command not found\x1b[0m")
+                        print("----------------------------------")
+                        print('Magnet:\x1b[31;1m ' +
+                              magnet_link + "\x1b[0m")
                 else:
                     print("Magnet: \x1b[31;1m" + magnet_link + "\x1b[0m")
             else:
