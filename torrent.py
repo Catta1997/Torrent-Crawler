@@ -133,8 +133,8 @@ class TorrentDownloader():
                     self.cmd_command.append(magnet_link)
                     result = 'def'
                     try:
-                        result = subprocess.call(
-                            x, stdout=subprocess.PIPE, shell=False)
+                        result = subprocess.check_output()(
+                            self.cmd_command, stdout=subprocess.PIPE, shell=False)
                     except FileNotFoundError:
                         pass
                     if result not in ('command not found', 'def'):
