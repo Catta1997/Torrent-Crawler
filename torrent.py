@@ -30,12 +30,6 @@ class TorrentDownloader():
     def search1337x(self, req, name_s):
         '''Parsing function'''
         # extracting data in json format
-        parsed_html = BeautifulSoup(req.text, "html.parser")
-        if len(parsed_html.findAll('tr')) == 1:
-            print(f"\x1b[31;1mNo torrent founded for \"{name_s}\"\x1b[0m")
-            print("")
-            sys.exit(0)
-        # Get Torrent Size
         for parsed in BeautifulSoup(req.text, "html.parser").findAll('tr'):
             size = "0 "
             seed = ""
@@ -76,6 +70,12 @@ class TorrentDownloader():
         for elem in range(1, max_elem + 1):
             url = f"https://www.1377x.to/search/{name_s}/{elem}/"
             req = requests.get(url=url, params={})
+            if elem == 1:
+                parsed_html = BeautifulSoup(req.text, "html.parser")
+                if len(parsed_html.findAll('tr')) == 1:
+                    print(f"\x1b[31;1mNo torrent founded for \"{name_s}\"\x1b[0m")
+                    print("")
+                    sys.exit(0)
             self.search1337x(req, name_s)
 
     def print_list(self):
