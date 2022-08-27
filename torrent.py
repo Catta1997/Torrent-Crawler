@@ -45,16 +45,20 @@ class TorrentDownloader():
                 date_t = (elem.text)
             title = ""
             link = ""
+            type_torr = ""
             for elem in parsed.findAll('td', attrs={'class': 'coll-1'}):
                 for tit in elem.find_all('a', href=True):
                     link = tit['href']
                     title = tit.text
+                    if("/sub/" in link):
+                        type_torr = link.split("/")[3]
             if len(title) > 1:
                 temp = {
                     'name': title,
                     'size': float(size.split(" ")[0]),
                     'seed': seed,
                     'leech': leech,
+                    'movie_type': type_torr,
                     'type': size.split(" ")[1],
                     'date' : date_t,
                     'link': 'https://www.1377x.to' + link
@@ -88,26 +92,28 @@ class TorrentDownloader():
         data = json.loads(self.json_torrent)
         for elem in data['Torrent']:
             title_t = elem['name']
-            print('\033[4m                                                                                                       \x1b[0m')
-            print(f"\033[1mTorrent {torrent} :\x1b[0m")
+            print('\033[4m')
+            print(' '*120)
+            print('\x1b[0m')
+            print(f" \033[1mTorrent {torrent} :\x1b[0m")
             y=0
             x = 95
-            print(f"\x1b[36mTITLE: {title_t[y:x]} \x1b[0m")
+            print(f" \x1b[36mTITLE: {title_t[y:x]} \x1b[0m")
             while x < len(title_t):
                 y+=95
                 x+=95
-                print
-                (f"\x1b[36m       {title_t[y:x]} \x1b[0m")
-            print(f"\033[91mDATE: {elem['date']} \x1b[0m")
-            
-            print(
-                f"\x1b[32mDIM: {str(elem['size'])} {elem['type']} \x1b[0m")
-            print(f"\x1b[33mSEED: {elem['seed']} \x1b[0m")
-            print(f"\x1b[37mLEECH: {elem['leech']} \x1b[0m")
+                print(f" \x1b[36m       {title_t[y:x]} \x1b[0m")
+            print(f" \033[91mDATE: {elem['date']} \x1b[0m")
+            print(f" \x1b[32mDIM: {str(elem['size'])} {elem['type']} \x1b[0m")
+            print(f" \x1b[33mSEED: {elem['seed']} \x1b[0m")
+            print(f" \x1b[37mLEECH: {elem['leech']} \x1b[0m")
+            print(f" \x1b[35mRESOLUTION: {elem['movie_type']} \x1b[0m")
             torrent += 1
     def select(self):
         '''Select torrent'''
-        print('\033[4m                                                                                                       \x1b[0m')
+        print('\033[4m')
+        print(' '*120)
+        print('\x1b[0m')
         found = 0
         while found == 0:
             item_dict = json.loads(self.json_torrent)
@@ -134,17 +140,16 @@ class TorrentDownloader():
                 y=0
                 x = 95
                 title_t = item_dict['name']
-                print(f"\x1b[36mTITLE: {title_t[y:x]} \x1b[0m")
+                print(f" \x1b[36mTITLE: {title_t[y:x]} \x1b[0m")
                 while x < len(title_t):
                     y+=95
                     x+=95
-                    print
-                    (f"\x1b[36m       {title_t[y:x]} \x1b[0m")
-                print(f"\033[91mDATE: {item_dict['date']} \x1b[0m")
-                print(
-                    f"\x1b[32mDIM: {str(item_dict['size'])} {item_dict['type']} \x1b[0m")
-                print(f"\x1b[33mSEED: {item_dict['seed']} \x1b[0m")
-                print(f"\x1b[37mLEECH: {item_dict['leech']} \x1b[0m")
+                    print(f" \x1b[36m       {title_t[y:x]} \x1b[0m")
+                print(f" \033[91mDATE: {item_dict['date']} \x1b[0m")
+                print(f" \x1b[32mDIM: {str(item_dict['size'])} {item_dict['type']} \x1b[0m")
+                print(f" \x1b[33mSEED: {item_dict['seed']} \x1b[0m")
+                print(f" \x1b[37mLEECH: {item_dict['leech']} \x1b[0m")
+                print(f" \x1b[35mRESOLUTION: {item_dict['movie_type']} \x1b[0m")
                 conf = input("y to confirm, n to repeat: ")
                 print('\033[4m                                                                                                       \x1b[0m')
                 if conf in ('n', 'N'):
@@ -158,7 +163,6 @@ class TorrentDownloader():
                         print('\033[4m                                                                                                       \x1b[0m')
                         print(f"Magnet:\x1b[31;1m {magnet_link} \x1b[0m")
                         sys.exit(0)
-
                     print('\x1b[32mSuccess\x1b[0m')
                 else:
                     print(f"Magnet:\x1b[31;1m {magnet_link} \x1b[0m")
