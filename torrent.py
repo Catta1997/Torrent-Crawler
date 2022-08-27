@@ -34,12 +34,15 @@ class TorrentDownloader():
             size = "0 "
             seed = ""
             leech = ""
+            date_t = ""
             for elem in parsed.findAll('td', attrs={'class': 'coll-2'}):
                 seed = (elem.text)
             for elem in parsed.findAll('td', attrs={'class': 'coll-3'}):
                 leech = (elem.text)
             for elem in parsed.findAll('td', attrs={'class': 'coll-4'}):
                 size = (elem.text)
+            for elem in parsed.findAll('td', attrs={'class': 'coll-date'}):
+                date_t = (elem.text)
             title = ""
             link = ""
             for elem in parsed.findAll('td', attrs={'class': 'coll-1'}):
@@ -53,6 +56,7 @@ class TorrentDownloader():
                     'seed': seed,
                     'leech': leech,
                     'type': size.split(" ")[1],
+                    'date' : date_t,
                     'link': 'https://www.1377x.to' + link
                 }
                 data = json.loads(self.json_torrent)
@@ -83,18 +87,27 @@ class TorrentDownloader():
         torrent = 1
         data = json.loads(self.json_torrent)
         for elem in data['Torrent']:
-            print('---------')
-            print(f"Torrent {torrent} :")
-            print(f"\x1b[36mTITLE: {elem['name']} \x1b[0m")
+            title_t = elem['name']
+            print('\033[4m                                                                                                       \x1b[0m')
+            print(f"\033[1mTorrent {torrent} :\x1b[0m")
+            y=0
+            x = 95
+            print(f"\x1b[36mTITLE: {title_t[y:x]} \x1b[0m")
+            while x < len(title_t):
+                y+=95
+                x+=95
+                print
+                (f"\x1b[36m       {title_t[y:x]} \x1b[0m")
+            print(f"\033[91mDATE: {elem['date']} \x1b[0m")
+            
             print(
                 f"\x1b[32mDIM: {str(elem['size'])} {elem['type']} \x1b[0m")
             print(f"\x1b[33mSEED: {elem['seed']} \x1b[0m")
             print(f"\x1b[37mLEECH: {elem['leech']} \x1b[0m")
             torrent += 1
-
     def select(self):
         '''Select torrent'''
-        print('---------')
+        print('\033[4m                                                                                                       \x1b[0m')
         found = 0
         while found == 0:
             item_dict = json.loads(self.json_torrent)
@@ -116,15 +129,24 @@ class TorrentDownloader():
                     for elem in parsed.find_all('a', href=True):
                         if 'magnet' in elem['href']:
                             magnet_link = elem['href']
-                print("----------------------------------")
+                print('\033[4m                                                                                                       \x1b[0m')
                 found = 1
-                print(f"\x1b[36mTITLE: {item_dict['name']} \x1b[0m")
+                y=0
+                x = 95
+                title_t = item_dict['name']
+                print(f"\x1b[36mTITLE: {title_t[y:x]} \x1b[0m")
+                while x < len(title_t):
+                    y+=95
+                    x+=95
+                    print
+                    (f"\x1b[36m       {title_t[y:x]} \x1b[0m")
+                print(f"\033[91mDATE: {item_dict['date']} \x1b[0m")
                 print(
                     f"\x1b[32mDIM: {str(item_dict['size'])} {item_dict['type']} \x1b[0m")
                 print(f"\x1b[33mSEED: {item_dict['seed']} \x1b[0m")
                 print(f"\x1b[37mLEECH: {item_dict['leech']} \x1b[0m")
                 conf = input("y to confirm, n to repeat: ")
-                print("----------------------------------")
+                print('\033[4m                                                                                                       \x1b[0m')
                 if conf in ('n', 'N'):
                     found = 0
                 elif(self.autoadd and (conf in ('y', 'Y'))):
@@ -133,7 +155,7 @@ class TorrentDownloader():
                         subprocess.check_call(self.cmd_command)
                     except (subprocess.CalledProcessError, FileNotFoundError):
                         print("\x1b[31;1mError, command not found\x1b[0m")
-                        print("----------------------------------")
+                        print('\033[4m                                                                                                       \x1b[0m')
                         print(f"Magnet:\x1b[31;1m {magnet_link} \x1b[0m")
                         sys.exit(0)
 
