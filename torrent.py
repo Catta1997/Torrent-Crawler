@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 
 class TorrentDownloader():
     '''Torrent magnet link'''
-    #text format
+    # text format
     bold_text = "\033[1m"
     underscore = "\x1b[4m"
     reset_clr = "\x1b[0m"
@@ -62,7 +62,7 @@ class TorrentDownloader():
                     title = tit.text
                     if "/sub/" in link:
                         type_torr = link.split("/")[3]
-            #create a json with torrent info
+            # create a json with torrent info
             if len(title) > 1:
                 temp = {
                     'name': title,
@@ -71,7 +71,7 @@ class TorrentDownloader():
                     'leech': leech,
                     'movie_type': type_torr,
                     'type': size.split(" ")[1],
-                    'date' : date_t,
+                    'date': date_t,
                     'link': 'https://www.1377x.to' + link
                 }
                 data = json.loads(self.json_torrent)
@@ -108,15 +108,15 @@ class TorrentDownloader():
             self.print_elem(elem)
             torrent += 1
 
-    def print_elem(self,elem):
+    def print_elem(self, elem):
         '''Print torrent element'''
         title_t = elem['name']
-        min_pos= 0
-        max_pos= 95
+        min_pos = 0
+        max_pos = 95
         print(f" {self.cyan}TITLE: {title_t[min_pos:max_pos]} {self.reset_clr}")
-        while max_pos< len(title_t):
-            min_pos+= 95
-            max_pos+= 95
+        while max_pos < len(title_t):
+            min_pos += 95
+            max_pos += 95
             print(f" {self.cyan}       {title_t[min_pos:max_pos]} {self.reset_clr}")
         print(f" {self.red}DATE: {elem['date']} {self.reset_clr}")
         print(f" {self.green}DIM: {str(elem['size'])} {elem['type']} {self.reset_clr}")
@@ -151,11 +151,11 @@ class TorrentDownloader():
                 found = 1
                 self.print_elem(item_dict)
                 conf = ""
-                while conf.lower() not in ['y','n']:
+                while conf.lower() not in ['y', 'n']:
                     conf = input("\ny to confirm, n to repeat: ")
                 if conf.lower() == 'n':
                     found = 0
-                elif(self.autoadd and conf.lower() == 'y'):
+                elif (self.autoadd and conf.lower() == 'y'):
                     self.cmd_command.append(f"\"{magnet_link}\"")
                     try:
                         subprocess.check_call(self.cmd_command)
@@ -187,6 +187,7 @@ class TorrentDownloader():
         '''Get ctr+c signal'''
         print("\n")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     x = TorrentDownloader()
