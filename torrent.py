@@ -106,7 +106,6 @@ class TorrentDownloader():
         title_t = elem['name']
         min_pos = 0
         max_pos = 95
-        print("scrivo nella riga "+str(torrent))
         TorrentDownloader.tabella.setItem(
             torrent, 0, QTableWidgetItem(title_t[min_pos:max_pos]))
         TorrentDownloader.tabella.setItem(
@@ -169,7 +168,6 @@ class TorrentDownloader():
         for elem in data['Torrent']:
             pos = torrent - 1
             TorrentDownloader.tabella.insertRow(pos)
-            print("creo la riga "+str(pos))
             TorrentDownloader.print_elem_gui(elem,pos)
             torrent += 1
 
