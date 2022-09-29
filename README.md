@@ -7,4 +7,5 @@
 Install Python3 and requierements
 
 Usage (Terminal) = `python3 terminal.py fast and furious`
+
 Usage (GUI) = `python3 gui.py`
