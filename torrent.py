@@ -200,11 +200,17 @@ class TorrentDownloader():
 
     def start(number):
         if not number: 
+            #GUI
             number = TorrentDownloader.tabella.currentRow()
-        #test = TorrentDownloader.tabella.selectedItems()
-        #for x in test:
-        #    print(x.row())
-        number -= 1  # indice di un array
+            # multiple selection
+            test = TorrentDownloader.tabella.selectedItems()
+            for x in test:
+                # only 1 item in a row
+                if x.column() == 1:
+                    # start download with each selected row
+                    TorrentDownloader.start(x.row())
+        else:
+            number -= 1  # indice di un array
         item_dict = json.loads(TorrentDownloader.json_torrent)
         if number < len(item_dict['Torrent']) and number >= 0:
             item_dict = json.loads(TorrentDownloader.json_torrent)[
