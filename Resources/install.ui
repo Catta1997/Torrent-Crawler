@@ -99,6 +99,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="add">
+        <property name="text">
+         <string>AutoAdd</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="select">
         <property name="text">
          <string>Seleziona</string>

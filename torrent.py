@@ -39,7 +39,7 @@ class TorrentDownloader():
     }
     '''
 
-    def search1337x(req):
+    def search1337x(self, req):
         '''Parsing function'''
         # extracting data in json format
         for parsed in BeautifulSoup(req.text, "html.parser").findAll('tr'):
@@ -85,8 +85,8 @@ class TorrentDownloader():
                 TorrentDownloader.json_torrent = json.dumps(
                     sorted_obj, indent=4)
 
-    def search1377x_request(name_s):
-        '''Request to site'''
+    def search1377x_request(self, name_s):
+        '''Request to the torrent site'''
         # sending get request and saving the response as response object
         max_elem = TorrentDownloader.torrent_pages
         for elem in range(1, max_elem + 1):
@@ -99,9 +99,9 @@ class TorrentDownloader():
                         f"{TorrentDownloader.red}No torrent founded for \"{name_s}\"{TorrentDownloader.TorrentDownloader.reset_clr}")
                     print("")
                     sys.exit(0)
-            TorrentDownloader.search1337x(req)
+            TorrentDownloader.search1337x(self, req)
 
-    def print_elem_gui(elem,torrent):
+    def print_elem_gui(self, elem, torrent):
         '''Print torrent element'''
         title_t = elem['name']
         min_pos = 0
@@ -120,7 +120,7 @@ class TorrentDownloader():
             torrent, 5, QTableWidgetItem(f"{elem['date']}"))
         TorrentDownloader.tabella.resizeColumnsToContents()
 
-    def print_elem(elem):
+    def print_elem(self, elem):
         '''Print torrent element'''
         title_t = elem['name']
         min_pos = 0
@@ -143,7 +143,7 @@ class TorrentDownloader():
         print(
             f" {TorrentDownloader.magenta}RESOLUTION: {elem['movie_type']} {TorrentDownloader.reset_clr}")
 
-    def avvia_ricerca():
+    def avvia_ricerca(self):
         TorrentDownloader.json_torrent = '''
     {
         "Torrent": [
@@ -151,7 +151,7 @@ class TorrentDownloader():
     }
     '''
         name_input = TorrentDownloader.titolo.text()
-        TorrentDownloader.search1377x_request(str(name_input))
+        TorrentDownloader.search1377x_request(self, str(name_input))
         # print list
         torrent = 1
         data = json.loads(TorrentDownloader.json_torrent)
@@ -161,17 +161,17 @@ class TorrentDownloader():
             QPushButton, "select")
         TorrentDownloader.seleziona.clicked.connect(
             TorrentDownloader.start)
-        # table_view->horizontalHeader()->setStretchLastSection(true);
+        # table_view->horizontalHeader(self)->setStretchLastSection(true);
         TorrentDownloader.tabella.clearContents()
         TorrentDownloader.tabella.setRowCount(0)
         QApplication.processEvents()
         for elem in data['Torrent']:
             pos = torrent - 1
             TorrentDownloader.tabella.insertRow(pos)
-            TorrentDownloader.print_elem_gui(elem,pos)
+            TorrentDownloader.print_elem_gui(self, elem, pos)
             torrent += 1
 
-    def select():
+    def select(self):
         '''Select torrent'''
         # write _____________
         print(f'{TorrentDownloader.underscore}'+' ' *
@@ -184,10 +184,11 @@ class TorrentDownloader():
             except ValueError:
                 print(
                     f"\n{TorrentDownloader.red}Not Valid!!{TorrentDownloader.reset_clr}\n")
-                TorrentDownloader.select()
+                TorrentDownloader.select(self)
             found = 1
-            item_dict = json.loads(TorrentDownloader.json_torrent)['Torrent'][number-1]
-            TorrentDownloader.print_elem(item_dict)
+            item_dict = json.loads(TorrentDownloader.json_torrent)[
+                'Torrent'][number-1]
+            TorrentDownloader.print_elem(self, item_dict)
             conf = ""
             while conf.lower() not in ['y', 'n']:
                 conf = input("\ny to confirm, n to repeat: ")
@@ -197,16 +198,19 @@ class TorrentDownloader():
                 TorrentDownloader.start(number)
 
     def start(number):
-        if not number: 
-            #GUI
+        if not number:
+            # GUI
+            TorrentDownloader.autoadd = TorrentDownloader.add.isChecked()
             number = TorrentDownloader.tabella.currentRow()
             # multiple selection
             test = TorrentDownloader.tabella.selectedItems()
             for x in test:
                 # only 1 item in a row
                 if x.column() == 1:
+                    riga = 1+x.row()
                     # start download with each selected row
-                    TorrentDownloader.start(x.row())
+                    TorrentDownloader.start(riga)
+            return
         else:
             number -= 1  # indice di un array
         item_dict = json.loads(TorrentDownloader.json_torrent)
@@ -231,15 +235,21 @@ class TorrentDownloader():
                     os.startfile(magnet_link)
                 elif sys.platform.startswith('darwin'):
                     subprocess.Popen(['open', magnet_link],
-                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 else:
                     subprocess.Popen(['xdg-open', magnet_link],
-                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 print(
                     f'\n{TorrentDownloader.green}Success{TorrentDownloader.reset_clr}')
             else:
-                print(
-                    f"\nMagnet:{TorrentDownloader.red} {magnet_link} {TorrentDownloader.reset_clr}\n")
+                if(TorrentDownloader.GUI):
+                    text = TorrentDownloader.magnet_window.findChild(
+                        QTextEdit, "magnet_link")
+                    text.insertPlainText(magnet_link)
+                    TorrentDownloader.magnet_window.show()
+                else:
+                    print(
+                        f"\nMagnet:{TorrentDownloader.red} {magnet_link} {TorrentDownloader.reset_clr}\n")
         else:
             print(
                 f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
@@ -252,6 +262,8 @@ class TorrentDownloader():
                 QLineEdit, "titolo")
             TorrentDownloader.cerca = TorrentDownloader.window.findChild(
                 QPushButton, "cerca")
+            TorrentDownloader.add = TorrentDownloader.window.findChild(
+                QCheckBox, "add")
             TorrentDownloader.cerca.clicked.connect(
                 TorrentDownloader.avvia_ricerca)
         else:
@@ -261,7 +273,7 @@ class TorrentDownloader():
                 name_input = sys.argv[1]
                 for elem in sys.argv[2:]:
                     name_input += '%20' + elem
-            TorrentDownloader.search1377x_request(str(name_input))
+            TorrentDownloader.search1377x_request(self, str(name_input))
             # print list
             torrent = 1
             data = json.loads(TorrentDownloader.json_torrent)
@@ -271,15 +283,16 @@ class TorrentDownloader():
                       120 + f'{TorrentDownloader.reset_clr}\n')
                 print(
                     f" {TorrentDownloader.bold_text}Torrent {torrent} :{TorrentDownloader.reset_clr}")
-                TorrentDownloader.print_elem(elem)
+                TorrentDownloader.print_elem(self, elem)
                 torrent += 1
-            TorrentDownloader.select()
+            TorrentDownloader.select(self)
 
     @classmethod
     def sig_handler(cls, _signo, _stack_frame):
         '''Get ctr+c signal'''
         print("\n")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     x = TorrentDownloader()
