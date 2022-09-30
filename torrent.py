@@ -100,7 +100,7 @@ class TorrentDownloader():
                     print("")
                     sys.exit(0)
             TorrentDownloader.search1337x(self, req)
-
+            
     def print_elem_gui(self, elem, torrent):
         '''Print torrent element'''
         title_t = elem['name']
@@ -119,7 +119,7 @@ class TorrentDownloader():
         TorrentDownloader.tabella.setItem(
             torrent, 5, QTableWidgetItem(f"{elem['date']}"))
         TorrentDownloader.tabella.resizeColumnsToContents()
-
+    
     def print_elem(self, elem):
         '''Print torrent element'''
         title_t = elem['name']
@@ -161,7 +161,6 @@ class TorrentDownloader():
             QPushButton, "select")
         TorrentDownloader.seleziona.clicked.connect(
             TorrentDownloader.start)
-        # table_view->horizontalHeader(self)->setStretchLastSection(true);
         TorrentDownloader.tabella.clearContents()
         TorrentDownloader.tabella.setRowCount(0)
         QApplication.processEvents()
@@ -255,6 +254,7 @@ class TorrentDownloader():
                 f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
 
     def __init__(self):
+        TorrentDownloader.filtro = KeyPressEater()
         signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
         signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
         if(TorrentDownloader.GUI):
@@ -266,6 +266,7 @@ class TorrentDownloader():
                 QCheckBox, "add")
             TorrentDownloader.cerca.clicked.connect(
                 TorrentDownloader.avvia_ricerca)
+            TorrentDownloader.titolo.installEventFilter(TorrentDownloader.filtro)
         else:
             if len(sys.argv) == 1:
                 name_input = input('Nome Film da cercare: ').strip()
@@ -296,3 +297,11 @@ class TorrentDownloader():
 
 if __name__ == "__main__":
     x = TorrentDownloader()
+
+class KeyPressEater(QObject):
+    def eventFilter(self, widget, event):
+        if (event.type() == QEvent.KeyPress):
+            key = event.key()
+            if key == Qt.Key_Return:
+                TorrentDownloader.avvia_ricerca(self)
+        return False
