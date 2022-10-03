@@ -1,16 +1,12 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
+from bs4 import BeautifulSoup
 import json
+import os
 import signal
 import subprocess
 import sys
+import re
 import requests
-import os
-from PySide2 import *
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtUiTools import *
-from PySide2.QtWidgets import *
-from bs4 import BeautifulSoup
 
 
 class TorrentDownloader():
@@ -29,7 +25,7 @@ class TorrentDownloader():
     # config
     GUI = True
     torrent_pages = 3
-    autoadd = True
+    autoadd = False
     # end config
 
     json_torrent = '''
@@ -39,7 +35,18 @@ class TorrentDownloader():
     }
     '''
 
-    def search1337x(self, req):
+    @staticmethod
+    def verify_magnet_link(magnet_link):
+        '''verify a magnet link using regex'''
+        result = re.fullmatch(
+            "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$", magnet_link)
+        if result != None:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def search1337x(req):
         '''Parsing function'''
         # extracting data in json format
         for parsed in BeautifulSoup(req.text, "html.parser").findAll('tr'):
@@ -85,23 +92,9 @@ class TorrentDownloader():
                 TorrentDownloader.json_torrent = json.dumps(
                     sorted_obj, indent=4)
 
-    def search1377x_request(self, name_s):
-        '''Request to the torrent site'''
-        # sending get request and saving the response as response object
-        max_elem = TorrentDownloader.torrent_pages
-        for elem in range(1, max_elem + 1):
-            url = f"https://www.1377x.to/search/{name_s}/{elem}/"
-            req = requests.get(url=url, params={})
-            if elem == 1:
-                parsed_html = BeautifulSoup(req.text, "html.parser")
-                if len(parsed_html.findAll('tr')) == 1:
-                    print(
-                        f"{TorrentDownloader.red}No torrent founded for \"{name_s}\"{TorrentDownloader.TorrentDownloader.reset_clr}")
-                    print("")
-                    sys.exit(0)
-            TorrentDownloader.search1337x(self, req)
-            
-    def print_elem_gui(self, elem, torrent):
+    @staticmethod
+    def print_elem_gui(elem, torrent):
+        from PySide2.QtWidgets import QTableWidgetItem
         '''Print torrent element'''
         title_t = elem['name']
         min_pos = 0
@@ -119,8 +112,9 @@ class TorrentDownloader():
         TorrentDownloader.tabella.setItem(
             torrent, 5, QTableWidgetItem(f"{elem['date']}"))
         TorrentDownloader.tabella.resizeColumnsToContents()
-    
-    def print_elem(self, elem):
+
+    @staticmethod
+    def print_elem(elem):
         '''Print torrent element'''
         title_t = elem['name']
         min_pos = 0
@@ -144,6 +138,8 @@ class TorrentDownloader():
             f" {TorrentDownloader.magenta}RESOLUTION: {elem['movie_type']} {TorrentDownloader.reset_clr}")
 
     def avvia_ricerca(self):
+        from PySide2.QtWidgets import QTableWidget, QPushButton, QApplication
+        '''avvio ricerca GUI'''
         TorrentDownloader.json_torrent = '''
     {
         "Torrent": [
@@ -167,8 +163,24 @@ class TorrentDownloader():
         for elem in data['Torrent']:
             pos = torrent - 1
             TorrentDownloader.tabella.insertRow(pos)
-            TorrentDownloader.print_elem_gui(self, elem, pos)
+            TorrentDownloader.print_elem_gui(elem, pos)
             torrent += 1
+
+    def search1377x_request(self, name_s):
+        '''Request to the torrent site'''
+        # sending get request and saving the response as response object
+        max_elem = TorrentDownloader.torrent_pages
+        for elem in range(1, max_elem + 1):
+            url = f"https://www.1377x.to/search/{name_s}/{elem}/"
+            req = requests.get(url=url, params={})
+            if elem == 1:
+                parsed_html = BeautifulSoup(req.text, "html.parser")
+                if len(parsed_html.findAll('tr')) == 1:
+                    print(
+                        f"{TorrentDownloader.red}No torrent founded for \"{name_s}\"{TorrentDownloader.reset_clr}")
+                    print("")
+                    sys.exit(0)
+            TorrentDownloader.search1337x(req)
 
     def select(self):
         '''Select torrent'''
@@ -187,7 +199,7 @@ class TorrentDownloader():
             found = 1
             item_dict = json.loads(TorrentDownloader.json_torrent)[
                 'Torrent'][number-1]
-            TorrentDownloader.print_elem(self, item_dict)
+            TorrentDownloader.print_elem(item_dict)
             conf = ""
             while conf.lower() not in ['y', 'n']:
                 conf = input("\ny to confirm, n to repeat: ")
@@ -197,6 +209,9 @@ class TorrentDownloader():
                 TorrentDownloader.start(number)
 
     def start(number):
+        if(TorrentDownloader.GUI):
+            # GUI import
+            from PySide2.QtWidgets import QTextEdit
         if not number:
             # GUI
             TorrentDownloader.autoadd = TorrentDownloader.add.isChecked()
@@ -222,9 +237,17 @@ class TorrentDownloader():
             magnet_link = ''
             for parsed in parsed_html.findAll('li'):
                 for elem in parsed.find_all('a', href=True):
-                    if 'magnet' in elem['href']:
+                    # not put verify here 'cause href can be magnet or other things
+                    if ('magnet' in elem['href']):
                         magnet_link = elem['href']
-            if (TorrentDownloader.autoadd):
+                        break  # stop se trovo un "magnet"
+            # check if it's a fake magnet link
+            if (not TorrentDownloader.verify_magnet_link(magnet_link)):
+                print(
+                    f"{TorrentDownloader.red}Not a valid Magnet{TorrentDownloader.reset_clr}")
+                sys.exit(0)
+            elif (TorrentDownloader.autoadd):
+                # check file system and start the magnet link
                 if sys.platform.startswith('linux'):
                     subprocess.Popen(
                         ['xdg-open', magnet_link], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -241,7 +264,7 @@ class TorrentDownloader():
                 print(
                     f'\n{TorrentDownloader.green}Success{TorrentDownloader.reset_clr}')
             else:
-                if(TorrentDownloader.GUI):
+                if (TorrentDownloader.GUI):
                     text = TorrentDownloader.magnet_window.findChild(
                         QTextEdit, "magnet_link")
                     text.insertPlainText(magnet_link)
@@ -253,11 +276,31 @@ class TorrentDownloader():
             print(
                 f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
 
+    def eventFilter(self, widget, event):
+        from PySide2.QtCore import QEvent, Qt
+        if (event.type() == QEvent.KeyPress):
+            key = event.key()
+            if key == Qt.Key_Return:
+                TorrentDownloader.avvia_ricerca(self)
+        return False
+
     def __init__(self):
-        TorrentDownloader.filtro = KeyPressEater()
+        if(TorrentDownloader.GUI):
+            # GUI import
+            from PySide2.QtWidgets import QCheckBox, QPushButton, QLineEdit
+            from PySide2.QtCore import QObject
+            class KeyPressEater(QObject):
+                def eventFilter(self, widget, event):
+                    from PySide2.QtCore import QEvent, Qt
+                    if (event.type() == QEvent.KeyPress):
+                        key = event.key()
+                        if key == Qt.Key_Return:
+                            TorrentDownloader.avvia_ricerca(self)
+                    return False
+            TorrentDownloader.filtro = KeyPressEater()
         signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
         signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
-        if(TorrentDownloader.GUI):
+        if (TorrentDownloader.GUI):
             TorrentDownloader.titolo = TorrentDownloader.window.findChild(
                 QLineEdit, "titolo")
             TorrentDownloader.cerca = TorrentDownloader.window.findChild(
@@ -266,7 +309,8 @@ class TorrentDownloader():
                 QCheckBox, "add")
             TorrentDownloader.cerca.clicked.connect(
                 TorrentDownloader.avvia_ricerca)
-            TorrentDownloader.titolo.installEventFilter(TorrentDownloader.filtro)
+            TorrentDownloader.titolo.installEventFilter(
+                TorrentDownloader.filtro)
         else:
             if len(sys.argv) == 1:
                 name_input = input('Nome Film da cercare: ').strip()
@@ -284,10 +328,9 @@ class TorrentDownloader():
                       120 + f'{TorrentDownloader.reset_clr}\n')
                 print(
                     f" {TorrentDownloader.bold_text}Torrent {torrent} :{TorrentDownloader.reset_clr}")
-                TorrentDownloader.print_elem(self, elem)
+                TorrentDownloader.print_elem(elem)
                 torrent += 1
             TorrentDownloader.select(self)
-
     @classmethod
     def sig_handler(cls, _signo, _stack_frame):
         '''Get ctr+c signal'''
@@ -295,13 +338,3 @@ class TorrentDownloader():
         sys.exit(0)
 
 
-if __name__ == "__main__":
-    x = TorrentDownloader()
-
-class KeyPressEater(QObject):
-    def eventFilter(self, widget, event):
-        if (event.type() == QEvent.KeyPress):
-            key = event.key()
-            if key == Qt.Key_Return:
-                TorrentDownloader.avvia_ricerca(self)
-        return False
