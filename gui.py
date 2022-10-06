@@ -2,8 +2,7 @@ import torrent
 import sys
 # GUI import
 try:
-    import PySide2
-    from PySide2.QtCore import QFile
+    from PySide2.QtCore import QFile, QCoreApplication, Qt
     from PySide2.QtUiTools import QUiLoader
     from PySide2.QtWidgets import QApplication
 except ModuleNotFoundError:
@@ -14,6 +13,7 @@ except ModuleNotFoundError:
     sys.exit(0)
 
 torrent.TorrentDownloader.GUI = True
+QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 app = QApplication(sys.argv)
 install_ui = 'Resources/install.ui'
 magnet_ui = 'Resources/show.ui'

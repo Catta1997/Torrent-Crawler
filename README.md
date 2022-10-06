@@ -1,11 +1,20 @@
 # Torrent-Crawler
-[![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)   
+
+[![forthebadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
 ![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/Catta1997/Torrent-Crawler)
 ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/Catta1997/Torrent-Crawler/requests?color=yellow)
 ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/Catta1997/Torrent-Crawler/beautifulsoup4?color=yellow)
 
-Install Python3 and requierements
+How to:
 
-Usage (Terminal) = `python3 terminal.py fast and furious`
+    - Install Python3
 
-Usage (GUI) = `python3 gui.py`
+Terminal:
+
+    - install `requirements.txt` (`pip3 install -r requirements.txt`)
+    - run `python3 torrent.py` (support for argv, `python3 torrent.py name`)
+
+GUI:
+
+    - install `requirements_gui.txt`  (`pip3 install -r requirements_gui.txt`)
+    - run `python3 gui.py`
