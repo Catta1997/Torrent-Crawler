@@ -23,7 +23,6 @@ class TorrentDownloader():
     cyan = "\x1b[36m"
     white = "\x1b[37m"
     # config
-    GUI = True
     torrent_pages = 3
     autoadd = False
     # end config
@@ -154,10 +153,11 @@ class TorrentDownloader():
                     sys.exit(0)
             TorrentDownloader.search1337x(req)
 
-    @staticmethod
-    def avvia_ricerca():
+    def avvia_ricerca(self, gui):
         '''avvio ricerca GUI'''
+        self.gui = gui
         from PySide2.QtWidgets import QTableWidget, QPushButton, QApplication
+        # reset to allow multiple search
         TorrentDownloader.json_torrent = '''
     {
         "Torrent": [
@@ -166,15 +166,14 @@ class TorrentDownloader():
     '''
         name_input = TorrentDownloader.titolo.text()
         TorrentDownloader.search1377x_request(str(name_input))
-        # print list
+        # populate tabel
         torrent = 1
         data = json.loads(TorrentDownloader.json_torrent)
         TorrentDownloader.tabella = TorrentDownloader.window.findChild(
             QTableWidget, "tableWidget")
         TorrentDownloader.seleziona = TorrentDownloader.window.findChild(
             QPushButton, "select")
-        TorrentDownloader.seleziona.clicked.connect(
-            TorrentDownloader.get_selected_element)
+        TorrentDownloader.seleziona.clicked.connect(lambda: TorrentDownloader.get_selected_element(self))
         TorrentDownloader.tabella.clearContents()
         TorrentDownloader.tabella.setRowCount(0)
         QApplication.processEvents()
@@ -184,7 +183,19 @@ class TorrentDownloader():
             TorrentDownloader.print_elem_gui(elem, pos)
             torrent += 1
 
-    def select(self):
+    def get_selected_element(self):
+        # GUI (first time only)
+        TorrentDownloader.autoadd = TorrentDownloader.add.isChecked()
+        # get multiple selection
+        items = TorrentDownloader.tabella.selectedItems()
+        for item in items:
+            # only 1 item in a row
+            if item.column() == 1:
+                # start download with each selected row
+                TorrentDownloader.get_magnet(self, item.row())
+        return
+
+    def choose(self):
         '''Select torrent'''
         # write _____________
         print(f'{TorrentDownloader.underscore}'+' ' *
@@ -197,7 +208,7 @@ class TorrentDownloader():
             except ValueError:
                 print(
                     f"\n{TorrentDownloader.red}Not Valid!!{TorrentDownloader.reset_clr}\n")
-                TorrentDownloader.select(self)
+                TorrentDownloader.choose(self)
             found = 1
             item_dict = json.loads(TorrentDownloader.json_torrent)[
                 'Torrent'][number-1]
@@ -209,27 +220,17 @@ class TorrentDownloader():
                 found = 0
             elif (conf.lower() == 'y'):
                 number -= 1  # indice di un array
-                if number < len(item_dict['Torrent']) and number >= 0: #controllo che number sia una scelta valida:
-                    TorrentDownloader.start(number)
+                # controllo che number sia una scelta valida:
+                item_dict = json.loads(TorrentDownloader.json_torrent)
+                if number < len(item_dict['Torrent']) and number >= 0:
+                    TorrentDownloader.get_magnet(self, number)
                 else:
                     print(
-                    f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
+                        f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
 
-    def get_selected_element(self):
-        # GUI (first time only)
-        TorrentDownloader.autoadd = TorrentDownloader.add.isChecked()
-        # get multiple selection
-        items = TorrentDownloader.tabella.selectedItems()
-        for item in items:
-            # only 1 item in a row
-            if item.column() == 1:
-                # start download with each selected row
-                TorrentDownloader.start(item.row())
-        return
-
-    def start(number):
+    def get_magnet(self, position):
         item_dict = json.loads(TorrentDownloader.json_torrent)[
-            'Torrent'][number]
+            'Torrent'][position]
         req = requests.get(url=item_dict['link'], params={})
         # extracting data in json format
         parsed_html = BeautifulSoup(req.text, "html.parser")
@@ -245,7 +246,11 @@ class TorrentDownloader():
             print(
                 f"{TorrentDownloader.red}Not a valid Magnet{TorrentDownloader.reset_clr}")
             sys.exit(0)
-        elif (TorrentDownloader.autoadd):
+        else:
+            TorrentDownloader.start(self, magnet_link)
+
+    def start(self, magnet_link):
+        if (TorrentDownloader.autoadd):
             done = True
             # avvio il magnet
             if sys.platform.startswith('linux'):
@@ -270,8 +275,8 @@ class TorrentDownloader():
             if done:
                 print(
                     f'\n{TorrentDownloader.green}Success{TorrentDownloader.reset_clr}')
-            else: # ho incontrato un errore
-                if (TorrentDownloader.GUI):
+            else:  # ho incontrato un errore
+                if (self.gui):
                     from PySide2.QtWidgets import QTextEdit
                     text = TorrentDownloader.magnet_window.findChild(
                         QTextEdit, "magnet_link")
@@ -281,7 +286,7 @@ class TorrentDownloader():
                     print(
                         f"\nMagnet:{TorrentDownloader.red}{magnet_link}{TorrentDownloader.reset_clr}\n")
         else:
-            if (TorrentDownloader.GUI):
+            if (self.gui):
                 from PySide2.QtWidgets import QTextEdit
                 text = TorrentDownloader.magnet_window.findChild(
                     QTextEdit, "magnet_link")
@@ -291,13 +296,18 @@ class TorrentDownloader():
                 print(
                     f"\nMagnet:{TorrentDownloader.red}{magnet_link}{TorrentDownloader.reset_clr}\n")
 
-    def __init__(self):
-        if(TorrentDownloader.GUI):
+    def __init__(self, gui):
+        self.gui = gui
+        signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
+        signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
+        if(self.gui):
             # GUI import
             from PySide2.QtWidgets import QCheckBox, QPushButton, QLineEdit
             from PySide2.QtCore import QObject
 
             class KeyPressEater(QObject):
+                print("key event")
+                print(self.gui)
                 '''event filter '''
 
                 def eventFilter(self, widget, event):
@@ -305,12 +315,9 @@ class TorrentDownloader():
                     if (event.type() == QEvent.KeyPress):
                         key = event.key()
                         if key == Qt.Key_Return:
-                            TorrentDownloader.avvia_ricerca()
+                            TorrentDownloader.avvia_ricerca(self, gui)
                     return False
             TorrentDownloader.filtro = KeyPressEater()
-        signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
-        signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
-        if (TorrentDownloader.GUI):
             TorrentDownloader.titolo = TorrentDownloader.window.findChild(
                 QLineEdit, "titolo")
             TorrentDownloader.cerca = TorrentDownloader.window.findChild(
@@ -340,7 +347,7 @@ class TorrentDownloader():
                     f" {TorrentDownloader.bold_text}Torrent {torrent} :{TorrentDownloader.reset_clr}")
                 TorrentDownloader.print_elem(elem)
                 torrent += 1
-            TorrentDownloader.select(self)
+            TorrentDownloader.choose(self)
 
     @classmethod
     def sig_handler(cls, _signo, _stack_frame):

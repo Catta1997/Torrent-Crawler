@@ -12,7 +12,6 @@ except ModuleNotFoundError:
     print(f"{bold_text}{red}Installa requirments_gui.txt{reset_clr}")
     sys.exit(0)
 
-torrent.TorrentDownloader.GUI = True
 QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 app = QApplication(sys.argv)
 install_ui = 'Resources/install.ui'
@@ -25,5 +24,5 @@ torrent.TorrentDownloader.magnet_window = loader.load(magnet_ui)
 ui_file.close()
 ui_magnet.close()
 torrent.TorrentDownloader.window.show()
-x = torrent.TorrentDownloader()
+x = torrent.TorrentDownloader(True)
 sys.exit(app.exec_())

@@ -1,4 +1,3 @@
 import torrent
 
-torrent.TorrentDownloader.GUI = False
-x = torrent.TorrentDownloader()
+x = torrent.TorrentDownloader(False)
