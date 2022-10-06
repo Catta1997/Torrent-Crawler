@@ -153,9 +153,8 @@ class TorrentDownloader():
                     sys.exit(0)
             TorrentDownloader.search1337x(req)
 
-    def avvia_ricerca(self, gui):
+    def avvia_ricerca(self):
         '''avvio ricerca GUI'''
-        self.gui = gui
         from PySide2.QtWidgets import QTableWidget, QPushButton, QApplication
         # reset to allow multiple search
         TorrentDownloader.json_torrent = '''
@@ -173,7 +172,8 @@ class TorrentDownloader():
             QTableWidget, "tableWidget")
         TorrentDownloader.seleziona = TorrentDownloader.window.findChild(
             QPushButton, "select")
-        TorrentDownloader.seleziona.clicked.connect(lambda: TorrentDownloader.get_selected_element(self))
+        TorrentDownloader.seleziona.clicked.connect(
+            lambda: TorrentDownloader.get_selected_element(self))
         TorrentDownloader.tabella.clearContents()
         TorrentDownloader.tabella.setRowCount(0)
         QApplication.processEvents()
@@ -306,16 +306,15 @@ class TorrentDownloader():
             from PySide2.QtCore import QObject
 
             class KeyPressEater(QObject):
-                print("key event")
-                print(self.gui)
                 '''event filter '''
+                self.gui = gui  # pass self parameter
 
                 def eventFilter(self, widget, event):
                     from PySide2.QtCore import QEvent, Qt
                     if (event.type() == QEvent.KeyPress):
                         key = event.key()
                         if key == Qt.Key_Return:
-                            TorrentDownloader.avvia_ricerca(self, gui)
+                            TorrentDownloader.avvia_ricerca(self)
                     return False
             TorrentDownloader.filtro = KeyPressEater()
             TorrentDownloader.titolo = TorrentDownloader.window.findChild(
@@ -325,7 +324,7 @@ class TorrentDownloader():
             TorrentDownloader.add = TorrentDownloader.window.findChild(
                 QCheckBox, "add")
             TorrentDownloader.cerca.clicked.connect(
-                TorrentDownloader.avvia_ricerca)
+                lambda: TorrentDownloader.avvia_ricerca(self))
             TorrentDownloader.titolo.installEventFilter(
                 TorrentDownloader.filtro)
         else:
