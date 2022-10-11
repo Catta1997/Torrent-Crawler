@@ -101,7 +101,7 @@ class TorrentDownloader():
         TorrentDownloader.tabella.setItem(
             torrent, 0, QTableWidgetItem(title_t[min_pos:max_pos]))
         TorrentDownloader.tabella.setItem(
-            torrent, 1, QTableWidgetItem(f"{str(elem['size'])}{elem['type']}"))
+            torrent, 1, QTableWidgetItem(f"{str(elem['size'])} {elem['type']}"))
         TorrentDownloader.tabella.setItem(
             torrent, 2, QTableWidgetItem(f"{elem['seed']}"))
         TorrentDownloader.tabella.setItem(
@@ -128,7 +128,7 @@ class TorrentDownloader():
         print(
             f" {TorrentDownloader.red}DATE: {elem['date']}{TorrentDownloader.reset_clr}")
         print(
-            f" {TorrentDownloader.green}DIM: {str(elem['size'])}{elem['type']}{TorrentDownloader.reset_clr}")
+            f" {TorrentDownloader.green}DIM: {str(elem['size'])} {elem['type']}{TorrentDownloader.reset_clr}")
         print(
             f" {TorrentDownloader.yellow}SEED: {elem['seed']}{TorrentDownloader.reset_clr}")
         print(
@@ -229,6 +229,7 @@ class TorrentDownloader():
                         f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
 
     def get_magnet(self, position):
+        print(self.gui)
         item_dict = json.loads(TorrentDownloader.json_torrent)[
             'Torrent'][position]
         req = requests.get(url=item_dict['link'], params={})
@@ -298,6 +299,7 @@ class TorrentDownloader():
 
     def __init__(self, gui):
         self.gui = gui
+        self_wrapp = self
         signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
         signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
         if(self.gui):
@@ -307,14 +309,12 @@ class TorrentDownloader():
 
             class KeyPressEater(QObject):
                 '''event filter '''
-                self.gui = gui  # pass self parameter
-
                 def eventFilter(self, widget, event):
                     from PySide2.QtCore import QEvent, Qt
                     if (event.type() == QEvent.KeyPress):
                         key = event.key()
                         if key == Qt.Key_Return:
-                            TorrentDownloader.avvia_ricerca(self)
+                            TorrentDownloader.avvia_ricerca(self_wrapp)
                     return False
             TorrentDownloader.filtro = KeyPressEater()
             TorrentDownloader.titolo = TorrentDownloader.window.findChild(
@@ -324,7 +324,7 @@ class TorrentDownloader():
             TorrentDownloader.add = TorrentDownloader.window.findChild(
                 QCheckBox, "add")
             TorrentDownloader.cerca.clicked.connect(
-                lambda: TorrentDownloader.avvia_ricerca(self))
+                lambda: TorrentDownloader.avvia_ricerca(self_wrapp))
             TorrentDownloader.titolo.installEventFilter(
                 TorrentDownloader.filtro)
         else:

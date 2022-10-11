@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>install_window</class>
  <widget class="QMainWindow" name="install_window">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1321</width>
-    <height>952</height>
+    <width>1378</width>
+    <height>920</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -38,6 +41,35 @@
          <number>0</number>
         </property>
         <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="logo">
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="pixmap">
+             <pixmap>1280px-1337X_logo.svg.png</pixmap>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QLineEdit" name="titolo"/>
         </item>
         <item>
@@ -50,80 +82,100 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableWidget" name="tableWidget">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>800</height>
-         </size>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="bottomMargin">
+         <number>50</number>
         </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContents</enum>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <column>
-         <property name="text">
-          <string>Titolo</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Dimensione</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Peer</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Seek</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Risoluzione</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Data</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="add">
-        <property name="text">
-         <string>AutoAdd</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="select">
-        <property name="text">
-         <string>Seleziona</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
+        <item>
+         <widget class="QTableWidget" name="tableWidget">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>650</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>900</height>
+           </size>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <column>
+           <property name="text">
+            <string>Titolo</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Dimensione</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Peer</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Seek</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Risoluzione</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Data</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="add">
+            <property name="text">
+             <string>AutoAdd</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="select">
+            <property name="text">
+             <string>Seleziona</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
