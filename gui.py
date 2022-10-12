@@ -1,6 +1,6 @@
 import torrent
 import sys
-from random import randrange
+from random import SystemRandom
 # GUI import
 try:
     from PySide2.QtCore import QFile, QCoreApplication, Qt
@@ -17,7 +17,8 @@ except ModuleNotFoundError:
 QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 app = QApplication(sys.argv)
 
-icon = randrange(1,15)
+rand = SystemRandom()
+icon = rand.randrange(1,15)
 app.setWindowIcon(QIcon(f"Resources/icon_{icon}.png"))
 install_ui = 'Resources/install.ui'
 magnet_ui = 'Resources/show.ui'

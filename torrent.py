@@ -229,7 +229,7 @@ class TorrentDownloader():
                         f"{TorrentDownloader.red}Not Valid{TorrentDownloader.reset_clr}")
 
     def get_magnet(self, position):
-        print(self.gui)
+        '''function to get magnet link'''
         item_dict = json.loads(TorrentDownloader.json_torrent)[
             'Torrent'][position]
         req = requests.get(url=item_dict['link'], params={})
@@ -251,6 +251,7 @@ class TorrentDownloader():
             TorrentDownloader.start(self, magnet_link)
 
     def start(self, magnet_link):
+        '''start gui search'''
         if (TorrentDownloader.autoadd):
             done = True
             # avvio il magnet
@@ -309,6 +310,7 @@ class TorrentDownloader():
 
             class KeyPressEater(QObject):
                 '''event filter '''
+
                 def eventFilter(self, widget, event):
                     from PySide2.QtCore import QEvent, Qt
                     if (event.type() == QEvent.KeyPress):
@@ -350,6 +352,6 @@ class TorrentDownloader():
 
     @classmethod
     def sig_handler(cls, _signo, _stack_frame):
-        '''Get ctr+c signal'''
+        '''Catch ctr+c signal'''
         print("\n")
         sys.exit(0)
