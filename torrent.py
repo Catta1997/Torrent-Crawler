@@ -1,4 +1,5 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
+
 from bs4 import BeautifulSoup
 import json
 import os
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import re
 import requests
+
 
 
 class TorrentDownloader():
