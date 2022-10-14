@@ -1,4 +1,5 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
+
 from bs4 import BeautifulSoup
 import json
 import os
@@ -7,6 +8,7 @@ import subprocess
 import sys
 import re
 import requests
+
 
 
 class TorrentDownloader():
@@ -257,21 +259,21 @@ class TorrentDownloader():
             # avvio il magnet
             if sys.platform.startswith('linux'):
                 try:
-                    subprocess.Popen(['xdg-open', magnet_link])
+                    subprocess.Popen(['/usr/bin/xdg-open', magnet_link])
                 except subprocess.CalledProcessError:
                     done = False
-            elif sys.platform.startswith('win32'):
-                done = os.startfile(magnet_link)  # check false
-            elif sys.platform.startswith('cygwin'):
-                done = os.startfile(magnet_link)  # check false
+            # elif sys.platform.startswith('win32'):
+            #   done = os.startfile(magnet_link)  # check false
+            # elif sys.platform.startswith('cygwin'):
+            #    done = os.startfile(magnet_link)  # check false
             elif sys.platform.startswith('darwin'):
                 try:
-                    subprocess.Popen(['open', magnet_link])
+                    subprocess.Popen(['/usr/bin/open', magnet_link])
                 except subprocess.CalledProcessError:
                     done = False
             else:
                 try:
-                    subprocess.Popen(['xdg-open', magnet_link])
+                    subprocess.Popen(['/usr/bin/xdg-open', magnet_link])
                 except subprocess.CalledProcessError:
                     done = False
             if done:
