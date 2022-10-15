@@ -2,7 +2,7 @@
 
 from bs4 import BeautifulSoup
 import json
-import os
+# import os
 import signal
 import subprocess
 import sys
