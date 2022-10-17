@@ -1,3 +1,4 @@
-
-.DS_Store
-*.txt
+**/.DS_Store
+.idea/*
+__pycache__/*
+__pycache__/torrent.cpython-39.pyc

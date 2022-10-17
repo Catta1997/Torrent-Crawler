@@ -7,11 +7,17 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/catta1997/torrent-crawler/badge)](https://www.codefactor.io/repository/github/catta1997/torrent-crawler)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c5e29e5593e143e097b0050bf78dfd8a)](https://www.codacy.com/gh/Catta1997/Torrent-Crawler/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Catta1997/Torrent-Crawler&amp;utm_campaign=Badge_Grade)
 
-Install Python3 and requierements
-Usage = `python torrent.py fast and furious`
 
-For QNAP use:
+How to:
 
-  1) Install `QTransmission` from `qnapclub.eu`
-  2) Open `/opt/QTransmission/etc/settings.json`
-  3) Edit `"rpc-port"` to `9091`
+    - Install Python3
+
+Terminal:
+
+    - install `requirements.txt` (`pip3 install -r requirements.txt`)
+    - run `python3 torrent.py` (support for argv, `python3 torrent.py name`)
+
+GUI:
+
+    - install `requirements_gui.txt`  (`pip3 install -r requirements_gui.txt`)
+    - run `python3 gui.py`
