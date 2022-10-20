@@ -1,5 +1,6 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
 
+from urllib import request
 from bs4 import BeautifulSoup
 import json
 # import os
@@ -78,8 +79,7 @@ class TorrentDownloader():
             self.torrent_list = json.loads(self.json_torrent)
             for elem in self.torrent_list['Torrent']:
                 # write _____________
-                print(underscore + ' ' *
-                      120 + reset_clr+'\n')
+                print(underscore + ' ' * 20 + reset_clr+'\n')
                 print(
                     f" {bold_text}Torrent {torrent} :{reset_clr}")
                 TorrentDownloader.print_elem(elem)
@@ -92,7 +92,7 @@ class TorrentDownloader():
         print("\n")
         sys.exit(0)
 
-    def read_config(self):
+    def read_config(self) -> None:
         '''read config.json'''
         try:
             tmp = json.load(open('config.json'))
@@ -109,7 +109,7 @@ class TorrentDownloader():
             self.sort_by = "size"
 
     @staticmethod
-    def verify_magnet_link(magnet_link):
+    def verify_magnet_link(magnet_link:str) -> bool:
         '''verify a magnet link using regex'''
         result = re.fullmatch(
             "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$", magnet_link)
@@ -118,7 +118,7 @@ class TorrentDownloader():
         else:
             return False
 
-    def search1337x(self, req):
+    def search1337x(self, req: requests.models.Response) -> None:
         '''Parsing function'''
         # extracting data in json format
         self.torrent_list = json.loads(self.json_torrent)
@@ -163,7 +163,7 @@ class TorrentDownloader():
         # update json with sorted json
         self.json_torrent = json.dumps(self.torrent_list)
 
-    def search1377x_request(self, name_s):
+    def search1377x_request(self, name_s:str) -> None:
         '''Request to the torrent site'''
         # sending get request and saving the response as response object
         max_elem = self.torrent_pages
@@ -181,7 +181,7 @@ class TorrentDownloader():
 
     '''GUI Functions'''
 
-    def start(self, magnet_link):
+    def start(self, magnet_link:str):
         '''start gui search'''
         if (self.autoadd):
             done = True
@@ -229,7 +229,7 @@ class TorrentDownloader():
                 f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
 
     @staticmethod
-    def print_elem_gui(elem, torrent):
+    def print_elem_gui(elem:dict, torrent:int) -> None:
         '''Print torrent element'''
         from PySide2.QtWidgets import QTableWidgetItem
         title_t = elem['name']
@@ -254,7 +254,7 @@ class TorrentDownloader():
         TorrentDownloader.tabella.resizeColumnsToContents()
         TorrentDownloader.tabella.resizeRowsToContents()
 
-    def avvia_ricerca(self):
+    def avvia_ricerca(self) -> None:
         '''avvio ricerca GUI'''
         from PySide2.QtWidgets import QTableWidget, QPushButton, QApplication
         # reset to allow multiple search
@@ -300,7 +300,7 @@ class TorrentDownloader():
 
     '''CLI Functions'''
     @staticmethod
-    def print_elem(elem):
+    def print_elem(elem:dict) -> None:
         '''Print torrent element'''
         title_t = elem['name']
         min_pos = 0
@@ -323,10 +323,10 @@ class TorrentDownloader():
         print(
             f" {magenta}TYPE: {elem['movie_type']}{reset_clr}")
 
-    def choose(self):
+    def choose(self) -> None:
         '''Select torrent'''
         # write _____________
-        print(underscore+' ' *120+reset_clr+'\n')
+        print(underscore+' ' * 120+reset_clr+'\n')
         found = 0
         while found == 0:
             try:
@@ -346,13 +346,13 @@ class TorrentDownloader():
                 found = 0
             elif (conf.lower() == 'y'):
                 # controllo che number sia una scelta valida:
-                if number < len(self.torrent_list) and number >= 0:
+                if number < len(self.torrent_list['Torrent']) and number >= 0:
                     TorrentDownloader.get_magnet(self)
                 else:
                     print(
                         f"{red}Not Valid{reset_clr}")
 
-    def get_magnet(self):
+    def get_magnet(self) -> None:
         '''function to get magnet link'''
         req = requests.get(self.selected_elem['link'], params={})
         # extracting data in json format
