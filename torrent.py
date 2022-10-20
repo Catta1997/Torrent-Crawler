@@ -10,7 +10,6 @@ import re
 import requests
 
 
-
 # text format
 bold_text = "\033[1m"
 underscore = "\x1b[4m"
@@ -22,6 +21,8 @@ blue = "\x1b[34m"
 magenta = "\x1b[35m"
 cyan = "\x1b[36m"
 white = "\x1b[37m"
+
+
 class TorrentDownloader():
     '''Add magnet link to transmission or other torrent client'''
 
@@ -77,8 +78,8 @@ class TorrentDownloader():
             self.torrent_list = json.loads(self.json_torrent)
             for elem in self.torrent_list['Torrent']:
                 # write _____________
-                print(f'{underscore}' + ' ' *
-                      120 + f'{reset_clr}\n')
+                print(underscore + ' ' *
+                      120 + reset_clr+'\n')
                 print(
                     f" {bold_text}Torrent {torrent} :{reset_clr}")
                 TorrentDownloader.print_elem(elem)
@@ -199,9 +200,9 @@ class TorrentDownloader():
                     done = False
             # TODO add and check windows support
             # elif sys.platform.startswith('win32'):
-            #   done = os.startfile(magnet_link) 
+            #   done = os.startfile(magnet_link)
             # elif sys.platform.startswith('cygwin'):
-            #    done = os.startfile(magnet_link) 
+            #    done = os.startfile(magnet_link)
             elif sys.platform.startswith('darwin'):
                 try:
                     subprocess.Popen(['/usr/bin/open', magnet_link])
@@ -325,8 +326,7 @@ class TorrentDownloader():
     def choose(self):
         '''Select torrent'''
         # write _____________
-        print(f'{underscore}'+' ' *
-              120+f'{reset_clr}\n')
+        print(underscore+' ' *120+reset_clr+'\n')
         found = 0
         while found == 0:
             try:
