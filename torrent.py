@@ -1,6 +1,5 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
 
-from typing import None
 from bs4 import BeautifulSoup
 import json
 # import os
