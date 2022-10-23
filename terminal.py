@@ -1,3 +1,3 @@
-import torrent
+from torrent import TorrentDownloader
 
-x = torrent.TorrentDownloader(False)
+x = TorrentDownloader(False)

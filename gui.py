@@ -1,4 +1,4 @@
-import torrent
+from torrent import TorrentDownloader
 import sys
 from random import SystemRandom
 # GUI import
@@ -25,14 +25,14 @@ magnet_ui = 'Resources/show.ui'
 ui_file = QFile(install_ui)
 ui_magnet = QFile(magnet_ui)
 loader = QUiLoader()
-torrent.TorrentDownloader.window = loader.load(ui_file)
-torrent.TorrentDownloader.magnet_window = loader.load(magnet_ui)
-torrent.TorrentDownloader.logo = torrent.TorrentDownloader.window.findChild(QLabel, 'logo')
-torrent.TorrentDownloader.window.setWindowTitle('TorrentDownloader')
+TorrentDownloader.window = loader.load(ui_file)
+TorrentDownloader.magnet_window = loader.load(magnet_ui)
+TorrentDownloader.logo = TorrentDownloader.window.findChild(QLabel, 'logo')
+TorrentDownloader.window.setWindowTitle('TorrentDownloader')
 pixmap = QPixmap('Resources/1280px-1337X_logo.svg.png')
-torrent.TorrentDownloader.logo.setPixmap(pixmap)
+TorrentDownloader.logo.setPixmap(pixmap)
 ui_file.close()
 ui_magnet.close()
-x = torrent.TorrentDownloader(True)
-torrent.TorrentDownloader.window.show()
+x = TorrentDownloader(True)
+TorrentDownloader.window.show()
 sys.exit(app.exec_())
