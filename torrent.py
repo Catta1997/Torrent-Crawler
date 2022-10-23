@@ -1,5 +1,6 @@
 '''Simple parsing  script to obtain magnet link of a torrent'''
 
+from typing import None
 from bs4 import BeautifulSoup
 import json
 # import os
@@ -8,7 +9,6 @@ import subprocess
 import sys
 import re
 import requests
-
 
 # text format
 bold_text = "\033[1m"
@@ -28,7 +28,7 @@ class TorrentDownloader():
 
     '''Common functions'''
 
-    def __init__(self, gui):
+    def __init__(self, gui: bool) -> None:
         self.gui = gui
         self_wrapp = self
         self.json_torrent = '''
@@ -37,33 +37,35 @@ class TorrentDownloader():
                     ]
             }
             '''
-        TorrentDownloader.read_config(self)
+        self.read_config()
         signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
         signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
         if(self.gui):
             # GUI import
             from PySide2.QtWidgets import QCheckBox, QPushButton, QLineEdit
             from PySide2.QtCore import QObject
+            from PySide2.QtGui import QKeyEvent
 
             class KeyPressEater(QObject):
                 '''event filter '''
 
-                def eventFilter(self, widget, event):
+                def eventFilter(self, widget, event: QKeyEvent) -> bool:
                     from PySide2.QtCore import QEvent, Qt
                     if (event.type() == QEvent.KeyPress):
                         key = event.key()
                         if key == Qt.Key_Return:
                             TorrentDownloader.avvia_ricerca(self_wrapp)
+                            return True
                     return False
             self.filtro = KeyPressEater()
-            TorrentDownloader.titolo = TorrentDownloader.window.findChild(
+            TorrentDownloader.titolo: QLineEdit = TorrentDownloader.window.findChild(
                 QLineEdit, "titolo")
-            TorrentDownloader.cerca = TorrentDownloader.window.findChild(
+            TorrentDownloader.cerca: QPushButton = TorrentDownloader.window.findChild(
                 QPushButton, "cerca")
-            TorrentDownloader.add = TorrentDownloader.window.findChild(
+            TorrentDownloader.add: QCheckBox = TorrentDownloader.window.findChild(
                 QCheckBox, "add")
             TorrentDownloader.cerca.clicked.connect(
-                lambda: TorrentDownloader.avvia_ricerca(self_wrapp))
+                lambda: TorrentDownloader.avvia_ricerca(self))
             TorrentDownloader.titolo.installEventFilter(self.filtro)
         else:
             if len(sys.argv) == 1:
@@ -72,7 +74,7 @@ class TorrentDownloader():
                 name_input = sys.argv[1]
                 for elem in sys.argv[2:]:
                     name_input += '%20' + elem
-            TorrentDownloader.search1377x_request(self, str(name_input))
+            self.search1377x_request(str(name_input))
             # print list
             torrent = 1
             self.torrent_list = json.loads(self.json_torrent)
@@ -83,32 +85,33 @@ class TorrentDownloader():
                     f" {bold_text}Torrent {torrent} :{reset_clr}")
                 TorrentDownloader.print_elem(elem)
                 torrent += 1
-            TorrentDownloader.choose(self)
+            self.choose()
 
     @classmethod
-    def sig_handler(cls, _signo, _stack_frame):
+    def sig_handler(cls, _signo, _stack_frame) -> None:
         '''Catch ctr+c signal'''
         print("\n")
         sys.exit(0)
 
     def read_config(self) -> None:
         '''read config.json'''
+        # inizialise with default value
+        self.torrent_pages: int = 3
+        self.autoadd: bool = True
+        self.custom_cmd: str = ""
+        self.sort_by: str = "size"
         try:
-            tmp = json.load(open('config.json'))
-            self.torrent_pages = tmp['torrent_pages']
-            self.autoadd = tmp['autoadd']
-            self.custom_cmd = tmp['custom_command']
-            self.sort_by = tmp['sort_by']
+            tmp: dict = json.load(open('config.json'))
+            self.torrent_pages: int = tmp['torrent_pages']
+            self.autoadd: bool = tmp['autoadd']
+            self.custom_cmd: str = tmp['custom_command']
+            self.sort_by: str = tmp['sort_by']
         except FileNotFoundError:
             print(
                 f"{ red  }config.json not found, using default value{reset_clr}")
-            self.torrent_pages = 3
-            self.autoadd = True
-            self.custom_cmd = ""
-            self.sort_by = "size"
 
     @staticmethod
-    def verify_magnet_link(magnet_link:str) -> bool:
+    def verify_magnet_link(magnet_link: str) -> bool:
         '''verify a magnet link using regex'''
         result = re.fullmatch(
             "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$", magnet_link)
@@ -162,7 +165,7 @@ class TorrentDownloader():
         # update json with sorted json
         self.json_torrent = json.dumps(self.torrent_list)
 
-    def search1377x_request(self, name_s:str) -> None:
+    def search1377x_request(self, name_s: str) -> None:
         '''Request to the torrent site'''
         # sending get request and saving the response as response object
         max_elem = self.torrent_pages
@@ -176,14 +179,13 @@ class TorrentDownloader():
                         f"{red}No torrent founded for \"{name_s}\"{reset_clr}")
                     print("")
                     sys.exit(0)
-            TorrentDownloader.search1337x(self, req)
+            self.search1337x(req)
 
     '''GUI Functions'''
 
-    def start(self, magnet_link:str):
+    def start(self, magnet_link: str) -> bool:
         '''start gui search'''
         if (self.autoadd):
-            done = True
             # avvio il magnet
             if self.custom_cmd:
                 try:
@@ -191,12 +193,12 @@ class TorrentDownloader():
                     cmd.append(magnet_link)
                     # subprocess.Popen(cmd)
                 except subprocess.CalledProcessError:
-                    done = False
+                    return False
             elif sys.platform.startswith('linux'):
                 try:
                     subprocess.Popen(['/usr/bin/xdg-open', magnet_link])
                 except subprocess.CalledProcessError:
-                    done = False
+                    return False
             # TODO add and check windows support
             # elif sys.platform.startswith('win32'):
             #   done = os.startfile(magnet_link)
@@ -206,29 +208,29 @@ class TorrentDownloader():
                 try:
                     subprocess.Popen(['/usr/bin/open', magnet_link])
                 except subprocess.CalledProcessError:
-                    done = False
+                    return False
             else:
                 try:
                     subprocess.Popen(['/usr/bin/xdg-open', magnet_link])
                 except subprocess.CalledProcessError:
-                    done = False
-            if done:
-                print(
-                    f'\n{green}Success{reset_clr}')
-                return
-        # errore o no autoadd
+                    return False
+            print(
+                f'\n{green}Success{reset_clr}')
+            return True
+        # no autoadd
         if (self.gui):
             from PySide2.QtWidgets import QTextEdit
-            text = TorrentDownloader.magnet_window.findChild(
+            text: QTextEdit = TorrentDownloader.magnet_window.findChild(
                 QTextEdit, "magnet_link")
             text.insertPlainText(magnet_link)
             TorrentDownloader.magnet_window.show()
         else:
             print(
                 f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
+        return True
 
     @staticmethod
-    def print_elem_gui(elem:dict, torrent:int) -> None:
+    def print_elem_gui(elem: dict, torrent: int) -> None:
         '''Print torrent element'''
         from PySide2.QtWidgets import QTableWidgetItem
         title_t = elem['name']
@@ -264,12 +266,12 @@ class TorrentDownloader():
     }
     '''
         name_input = TorrentDownloader.titolo.text()
-        TorrentDownloader.search1377x_request(self, str(name_input))
+        self.search1377x_request(str(name_input))
         # populate tabel
         torrent = 1
-        TorrentDownloader.tabella = TorrentDownloader.window.findChild(
+        TorrentDownloader.tabella: QTableWidget = TorrentDownloader.window.findChild(
             QTableWidget, "tableWidget")
-        TorrentDownloader.seleziona = TorrentDownloader.window.findChild(
+        TorrentDownloader.seleziona: QPushButton = TorrentDownloader.window.findChild(
             QPushButton, "select")
         TorrentDownloader.seleziona.clicked.connect(
             lambda: TorrentDownloader.get_selected_element(self))
@@ -282,7 +284,7 @@ class TorrentDownloader():
             TorrentDownloader.print_elem_gui(elem, pos)
             torrent += 1
 
-    def get_selected_element(self):
+    def get_selected_element(self) -> None:
         '''get list of selected row in GUI'''
         # GUI (first time only)
         self.autoadd = TorrentDownloader.add.isChecked()
@@ -294,12 +296,11 @@ class TorrentDownloader():
                 # start download with each selected row
                 self.selected_elem = self.torrent_list[
                     'Torrent'][item.row()]
-                TorrentDownloader.get_magnet(self)
-        return
+                self.get_magnet()
 
     '''CLI Functions'''
     @staticmethod
-    def print_elem(elem:dict) -> None:
+    def print_elem(elem: dict) -> None:
         '''Print torrent element'''
         title_t = elem['name']
         min_pos = 0
@@ -346,7 +347,7 @@ class TorrentDownloader():
             elif (conf.lower() == 'y'):
                 # controllo che number sia una scelta valida:
                 if number < len(self.torrent_list['Torrent']) and number >= 0:
-                    TorrentDownloader.get_magnet(self)
+                    self.get_magnet()
                 else:
                     print(
                         f"{red}Not Valid{reset_clr}")
@@ -365,8 +366,24 @@ class TorrentDownloader():
                     break  # stop se trovo un "magnet"
         # check if it's a fake magnet link
         if (TorrentDownloader.verify_magnet_link(magnet_link)):
-            TorrentDownloader.start(self, magnet_link)
+            # start magnet link
+            if not self.start(magnet_link):
+                if (self.gui):
+                    from PySide2.QtWidgets import QTextEdit
+                    text: QTextEdit = TorrentDownloader.magnet_window.findChild(
+                        QTextEdit, "magnet_link")
+                    text.insertPlainText(magnet_link)
+                    TorrentDownloader.magnet_window.show()
+                else:  # error in starting magnet link
+                    print(
+                        f"{red}An Error Occured while executing command{reset_clr}\n")
+                    print(
+                        f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
         else:
             print(
                 f"{red}Not a valid Magnet{reset_clr}")
             sys.exit(0)
+
+
+if __name__ == "__main__":
+    print(f"{red} Please run terminal.py or gui.py{reset_clr}")
