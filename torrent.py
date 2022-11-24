@@ -81,40 +81,37 @@ class TorrentDownloader():
         # extracting data in json format
         self.torrent_list = json.loads(self.json_torrent)
         for parsed in BeautifulSoup(req.text, "html.parser").findAll('tr'):
-            size = "0 "
-            seed = ""
-            leech = ""
-            date_t = ""
-            for elem in parsed.findAll('td', attrs={'class': 'coll-2'}):
-                seed = (elem.text)
-            for elem in parsed.findAll('td', attrs={'class': 'coll-3'}):
-                leech = (elem.text)
-            for elem in parsed.findAll('td', attrs={'class': 'coll-4'}):
-                size = (elem.text)
-            for elem in parsed.findAll('td', attrs={'class': 'coll-date'}):
-                date_t = (elem.text)
-            title = ""
-            link = ""
-            type_torr = ""
-            for elem in parsed.findAll('td', attrs={'class': 'coll-1'}):
+            try:
+                size = (parsed.find('td', attrs={
+                        'class': 'coll-4'}).get_text())
+                leech = (parsed.find('td', attrs={
+                         'class': 'coll-3'}).get_text())
+                date_t = (parsed.find(
+                    'td', attrs={'class': 'coll-date'}).get_text())
+                seed = (parsed.find('td', attrs={
+                        'class': 'coll-2'}).get_text())
+                elem = parsed.find('td', attrs={'class': 'coll-1'})
                 for tit in elem.find_all('a', href=True):
                     link = tit['href']
                     title = tit.text
                     if "/sub/" in link:
                         type_torr = link.split("/")[3]
+                if len(title) > 1:
+                    temp = {
+                        'name': title,
+                        'size': float(size.split(" ")[0]),
+                        'seed': seed,
+                        'leech': leech,
+                        'movie_type': type_torr,
+                        'type': size.split(" ")[1],
+                        'date': date_t,
+                        'link': 'https://www.1337xx.to' + link
+                    }
+                    self.torrent_list['Torrent'].append(temp)
+            except AttributeError:
+                continue
+
             # create a json with torrent info
-            if len(title) > 1:
-                temp = {
-                    'name': title,
-                    'size': float(size.split(" ")[0]),
-                    'seed': seed,
-                    'leech': leech,
-                    'movie_type': type_torr,
-                    'type': size.split(" ")[1],
-                    'date': date_t,
-                    'link': 'https://www.1337xx.to' + link
-                }
-                self.torrent_list['Torrent'].append(temp)
         self.json_torrent = json.dumps(self.torrent_list)
         self.torrent_list['Torrent'] = sorted(
             self.torrent_list['Torrent'], key=lambda pos: pos[self.sort_by], reverse=True)  # sort list with given key selected in config.json
@@ -141,8 +138,8 @@ class TorrentDownloader():
 
     def ricerca_gui(self) -> None:
         '''GUI search function'''
-        self_wrapp = self
         # GUI import
+        selfw = self
         from PySide2.QtWidgets import QCheckBox, QPushButton, QLineEdit
         from PySide2.QtCore import QObject
         from PySide2.QtGui import QKeyEvent
@@ -155,7 +152,7 @@ class TorrentDownloader():
                 if (event.type() == QEvent.KeyPress):
                     key = event.key()
                     if key == Qt.Key_Return:
-                        TorrentDownloader.avvia_ricerca(self_wrapp)
+                        TorrentDownloader.avvia_ricerca(selfw)
                         return True
                 return False
         self.filtro = KeyPressEater()
@@ -317,8 +314,7 @@ class TorrentDownloader():
         while max_pos < len(title_t):
             min_pos += 95
             max_pos += 95
-            print(
-                f" {cyan}       {title_t[min_pos:max_pos]}{reset_clr}")
+            print(f" {cyan}       {title_t[min_pos:max_pos]}{reset_clr}")
         print(
             f" {red}DATE: {elem['date']}{reset_clr}")
         print(
