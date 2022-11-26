@@ -66,16 +66,6 @@ class TorrentDownloader():
             print(
                 f"{ red  }config.json not found, using default value{reset_clr}")
 
-    @staticmethod
-    def verify_magnet_link(magnet_link: str) -> bool:
-        '''verify a magnet link using regex'''
-        result = re.fullmatch(
-            "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$", magnet_link)
-        if result is not None:
-            return True
-        else:
-            return False
-
     def search1337x(self, req: requests.models.Response) -> None:
         '''Parsing function'''
         # extracting data in json format
@@ -365,25 +355,24 @@ class TorrentDownloader():
         parsed_html = BeautifulSoup(req.text, "html.parser")
         magnet_link = ''
         for parsed in parsed_html.findAll('li'):
-            for elem in parsed.find_all('a', href=True):
-                # not put verify here 'cause href can be magnet or other things
-                if ('magnet' in elem['href']):
-                    magnet_link = elem['href']
-                    # check if it's a fake magnet link
-                    if (TorrentDownloader.verify_magnet_link(magnet_link)):
-                        # start magnet link
-                        if not self.start(magnet_link):
-                            if (self.gui):
-                                from PySide2.QtWidgets import QTextEdit
-                                text: QTextEdit = TorrentDownloader.magnet_window.findChild(
-                                    QTextEdit, "magnet_link")
-                                text.insertPlainText(magnet_link)
-                                TorrentDownloader.magnet_window.show()
-                            else:  # error in starting magnet link
-                                print(
-                                    f"{red}An Error Occured while executing command{reset_clr}\n")
-                                print(
-                                    f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
+            for x in parsed.find_all(href=re.compile("^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$")): # search magnet link using regex
+                magnet_link = x['href']
+        if magnet_link != '':
+            if not self.start(magnet_link):
+                if (self.gui):
+                    from PySide2.QtWidgets import QTextEdit
+                    text: QTextEdit = TorrentDownloader.magnet_window.findChild(
+                        QTextEdit, "magnet_link")
+                    text.insertPlainText(magnet_link)
+                    TorrentDownloader.magnet_window.show()
+                else:  # error in starting magnet link
+                    print(
+                        f"{red}An Error Occured while executing command{reset_clr}\n")
+                    print(
+                        f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
+        else:
+            print(
+                f"{red}No Magnet Link Found{reset_clr}\n")
 
 
 if __name__ == "__main__":
