@@ -23,12 +23,7 @@ class TorrentDownloaderCLI():
     '''choose magnet from cli'''
     def __init__(self) -> None:
         TorrentDownloader.setup(TorrentDownloader)
-        if len(sys.argv) == 1:
-            name_input = input('Nome Film da cercare: ').strip()
-        else:
-            name_input = sys.argv[1]
-            for elem in sys.argv[2:]:
-                name_input += '%20' + elem
+        name_input = "fast and furious"
         TorrentDownloader.search1377x_request(
             TorrentDownloader, str(name_input))
         # print list
@@ -73,17 +68,11 @@ class TorrentDownloaderCLI():
         print(underscore+' ' * 120+reset_clr+'\n')
         found = 0
         while found == 0:
-            try:
-                number = int(input('Choose torrent: '))
-            except ValueError:
-                print(
-                    f"\n{red}Not Valid!!{reset_clr}\n")
-                TorrentDownloaderCLI.choose(self)
             found = 1
-            number -= 1  # indice di un array
+            number = 0  # indice di un array
             self.selected_elem = TorrentDownloader.torrent_list['Torrent'][number]
             TorrentDownloaderCLI.print_elem(self.selected_elem)
-            conf = ""
+            conf = "y"
             while conf.lower() not in ['y', 'n']:
                 conf = input("\ny to confirm, n to repeat: ")
             if conf.lower() == 'n':
