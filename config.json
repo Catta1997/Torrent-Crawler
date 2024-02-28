@@ -1,5 +1,5 @@
 {
-    "torrent_pages": 3,
+    "torrent_pages": 1,
     "autoadd": true, 
     "sort_by" : "size",
     "custom_command": ""
