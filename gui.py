@@ -10,9 +10,9 @@ bold_text = "\033[1m"
 red = "\x1b[31m"
 # GUI import
 try:
-    from PySide2.QtCore import QFile, QCoreApplication, Qt, QObject, QEvent
-    from PySide2.QtUiTools import QUiLoader
-    from PySide2.QtWidgets import (
+    from PySide6.QtCore import QFile, QCoreApplication, Qt, QObject, QEvent
+    from PySide6.QtUiTools import QUiLoader
+    from PySide6.QtWidgets import (
         QApplication,
         QLabel,
         QCheckBox,
@@ -21,7 +21,7 @@ try:
         QTableWidgetItem,
         QTableWidget,
     )
-    from PySide2.QtGui import QIcon, QPixmap, QKeyEvent
+    from PySide6.QtGui import QIcon, QPixmap, QKeyEvent
 except ModuleNotFoundError:
     bold_text = "\033[1m"
     red = "\x1b[31m"

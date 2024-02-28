@@ -255,9 +255,9 @@ class TorrentDownloader:
 
     def show_magnet(str_magnet: str) -> None:
         """show magnet link on window"""
-        from PySide2.QtCore import QFile
-        from PySide2.QtUiTools import QUiLoader
-        from PySide2.QtWidgets import QTextEdit
+        from PySide6.QtCore import QFile
+        from PySide6.QtUiTools import QUiLoader
+        from PySide6.QtWidgets import QTextEdit
 
         loader = QUiLoader()
         magnet_ui = "Resources/show.ui"
