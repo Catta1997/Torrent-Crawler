@@ -31,6 +31,7 @@ class TorrentDownloader:
     """Add magnet link to transmission or other torrent client"""
 
     def __init__(self) -> None:
+        # a rigor non la chiamo mai
         self.torrent_pages = None
         self.autoadd = None
         self.custom_cmd = None
@@ -39,11 +40,12 @@ class TorrentDownloader:
 
     torren_fields = []
 
-    def setup(self) -> None:
+    def setup(self, gui:bool) -> None:
         """inizitialize variables"""
         self.read_config()
-        signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
-        signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
+        self.gui = gui
+        signal.signal(signal.SIGTERM, self.sig_handler)
+        signal.signal(signal.SIGINT, self.sig_handler)
 
     @classmethod
     def sig_handler(cls, _signo, _stack_frame) -> None:
@@ -91,7 +93,7 @@ class TorrentDownloader:
             date = re.sub(r"^\W*|\W*$", "", x[4].text)
             link = parsed.find("a", {"class": "dl-magnet"})["href"]
             temp = torrentelem.TorrentElem(name=name, size=size, seeders=seed, leecher=leech, date=date,
-                                           file_type=type_t[0], magnet=link)
+                                           file_type=type_t[0], magnet="", link=link)
             self.torren_fields.append(temp)
         self.torren_fields.sort(key=lambda x: x.size, reverse=True)
 
@@ -114,8 +116,10 @@ class TorrentDownloader:
                     if "/sub/" in link:
                         type_torr = link.split("/")[3]
                 if len(title) > 1:
-                    temp = torrentelem.TorrentElem(name=title, size=float(size.split(" ")[0]), seeders=seed, leecher=leech,
-                                                   date=date_t, file_type=type_torr, magnet=link)
+                    temp = torrentelem.TorrentElem(name=title, size=float(size.split(" ")[0]), seeders=seed,
+                                                   leecher=leech,
+                                                   date=date_t, file_type=type_torr, magnet="",
+                                                   link=("https://www.1337xx.to" + link))
                     self.torren_fields.append(temp)
             except AttributeError:
                 continue
@@ -123,7 +127,7 @@ class TorrentDownloader:
             # create a json with torrent info
             self.torren_fields.sort(key=lambda x: x.size, reverse=True)
 
-    #   TorrentDownloader.json_torrent = json.dumps(self.torrent_list)
+    #   self.json_torrent = json.dumps(self.torrent_list)
 
     def search1377x_request(self, name_s: str) -> None:
         """Request to the torrent site"""
@@ -179,48 +183,12 @@ class TorrentDownloader:
         print("else")
         if self.gui:
             print("if")
-            TorrentDownloader.show_magnet(magnet_link)
+            self.show_magnet(magnet_link)
         else:
             print(
                 f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
         return True
 
-    def get_magnet(self, link: str, gui: bool) -> None:
-        """function to get magnet link"""
-        self.gui = gui
-        pattern = "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$"
-        if not re.match(pattern=pattern, string=link):
-            """function to get magnet link"""
-            headers = {"User-Agent": "Mozilla/5.0"}
-            req = requests.get(link, headers=headers)
-            # extracting data in json format
-            print("req")
-            parsed_html = BeautifulSoup(req.text, "html.parser")
-            magnet_link = ""
-            for parsed in parsed_html.findAll("li"):
-                # search magnet link using regex
-                for x in parsed.find_all(
-                        href=re.compile(pattern)
-                ):
-                    magnet_link = x["href"]
-        else:
-            magnet_link = link
-
-    def start_download(self, magnet_link: str) -> None:
-        if magnet_link != "":
-            if not TorrentDownloader.start(self, magnet_link):
-                if self.gui:
-                    from gui import TorrentDownloaderGUI
-                    TorrentDownloader.show_magnet(magnet_link)
-                else:  # error in starting magnet link
-                    print(
-                        f"{red}An Error Occured while executing command{reset_clr}\n")
-                    print(
-                        f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
-        else:
-            print(f"{red}No Magnet Link Found{reset_clr}\n")
-
-    @staticmethod
     def show_magnet(self, str_magnet: str) -> None:
         """show magnet link on window"""
         from PySide6.QtCore import QFile
@@ -230,15 +198,18 @@ class TorrentDownloader:
         loader = QUiLoader()
         magnet_ui = 'Resources/show.ui'
         ui_magnet = QFile(magnet_ui)
-        TorrentDownloader.magnet_window = loader.load(magnet_ui)
+        self.magnet_window = loader.load(magnet_ui)
         ui_magnet.close()
         print("textedit 2")
-        text: QTextEdit = TorrentDownloader.magnet_window.findChild(
+        text: QTextEdit = self.magnet_window.findChild(
             QTextEdit, "magnet_link")
         text.insertPlainText(str_magnet)
         print("open 2")
-        TorrentDownloader.magnet_window.show()
+        self.magnet_window.show()
+        TorrentDownloader.widgetList.append(self.magnet_window)
+
 
 
 if __name__ == "__main__":
+    TorrentDownloader.widgetList = []
     print(f"{red} Please run terminal.py or gui.py{reset_clr}")

@@ -1,6 +1,6 @@
 {
     "torrent_pages": 3,
-    "autoadd": true, 
+    "autoadd": false, 
     "sort_by" : "size",
     "custom_command": ""
 }

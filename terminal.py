@@ -26,7 +26,7 @@ class TorrentDownloaderCLI:
     t = TorrentDownloader()
 
     def __init__(self) -> None:
-        TorrentDownloader.setup(self.t)
+        self.t.setup(False)
         if len(sys.argv) == 1:
             name_input = input("Nome Film da cercare: ").strip()
         else:
@@ -77,7 +77,7 @@ class TorrentDownloaderCLI:
                 TorrentDownloaderCLI.choose(self)
             found = 1
             number -= 1  # indice di un array
-            selected_elem:torrentelem = TorrentDownloader.torren_fields[number]
+            selected_elem:torrentelem.TorrentElem = TorrentDownloader.torren_fields[number]
             TorrentDownloaderCLI.print_elem(selected_elem)
             conf = ""
             while conf.lower() not in ["y", "n"]:
@@ -87,9 +87,8 @@ class TorrentDownloaderCLI:
             elif conf.lower() == "y":
                 # controllo che number sia una scelta valida:
                 if 0 <= number < len(TorrentDownloader.torren_fields):
-                    TorrentDownloader.get_magnet(
-                        self.t, selected_elem.link, False
-                    )
+                    selected_elem.get_magnet()
+                    self.t.start(selected_elem.magnet)
                 else:
                     print(f"{red}Not Valid{reset_clr}")
 

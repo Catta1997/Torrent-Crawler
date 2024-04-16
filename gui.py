@@ -26,7 +26,7 @@ except ModuleNotFoundError:
 class TorrentDownloaderGUI:
     """Download Torrent GUI"""
     tabella = None
-    t = TorrentDownloader()
+    t: TorrentDownloader = TorrentDownloader()
     titolo: QLineEdit
     cerca: QPushButton
     add: QCheckBox
@@ -38,7 +38,7 @@ class TorrentDownloaderGUI:
         self.autoadd = None
         self.selected_elem = None
         selfw = self
-        self.t.setup()
+        self.t.setup(True)
 
         class KeyPressEater(QObject):
             """event filter """
@@ -49,43 +49,42 @@ class TorrentDownloaderGUI:
                 if event.type() == QEvent.KeyPress:
                     key = event.key()
                     if key == Qt.Key_Return:
-                        TorrentDownloaderGUI.avvia_ricerca(
+                        self.avvia_ricerca(
                             selfw)
                         return True
                 return False
 
-        TorrentDownloaderGUI.filtro = KeyPressEater()
-        self.titolo = TorrentDownloaderGUI.window.findChild(QLineEdit, "titolo")
-        self.cerca = TorrentDownloaderGUI.window.findChild(QPushButton, "cerca")
-        self.add = TorrentDownloaderGUI.window.findChild(QCheckBox, "add")
-        TorrentDownloaderGUI.cerca.clicked.connect(
-            lambda: TorrentDownloaderGUI.avvia_ricerca(self))
-        TorrentDownloaderGUI.titolo.installEventFilter(self.filtro)
+        self.filtro = KeyPressEater()
+        self.titolo = self.window.findChild(QLineEdit, "titolo")
+        self.cerca = self.window.findChild(QPushButton, "cerca")
+        self.add = self.window.findChild(QCheckBox, "add")
+        self.cerca.clicked.connect(
+            lambda: self.avvia_ricerca())
+        self.titolo.installEventFilter(self.filtro)
 
-    @staticmethod
-    def print_elem_gui(elem: torrentelem.TorrentElem, torrent: int) -> None:
+    def print_elem_gui(self, elem: torrentelem.TorrentElem, torrent: int) -> None:
         """insert torrent element in table"""
         title_t = elem.name
         min_pos = 0
         max_pos = 70
         if max_pos < len(title_t):
-            TorrentDownloaderGUI.tabella.setItem(torrent, 0, QTableWidgetItem(
+            self.tabella.setItem(torrent, 0, QTableWidgetItem(
                 (title_t[min_pos:max_pos] + "\n" + title_t[max_pos:140])))
         else:
-            TorrentDownloaderGUI.tabella.setItem(
+            self.tabella.setItem(
                 torrent, 0, QTableWidgetItem(title_t))
-        TorrentDownloaderGUI.tabella.setItem(
+        self.tabella.setItem(
             torrent, 1, QTableWidgetItem(f"{str(elem.size)} {elem.file_type}"))
-        TorrentDownloaderGUI.tabella.setItem(
+        self.tabella.setItem(
             torrent, 2, QTableWidgetItem(elem.seeders))
-        TorrentDownloaderGUI.tabella.setItem(
+        self.tabella.setItem(
             torrent, 3, QTableWidgetItem(elem.leecher))
-        TorrentDownloaderGUI.tabella.setItem(
+        self.tabella.setItem(
             torrent, 4, QTableWidgetItem(elem.file_type))
-        TorrentDownloaderGUI.tabella.setItem(
+        self.tabella.setItem(
             torrent, 5, QTableWidgetItem(elem.date))
-        TorrentDownloaderGUI.tabella.resizeColumnsToContents()
-        TorrentDownloaderGUI.tabella.resizeRowsToContents()
+        self.tabella.resizeColumnsToContents()
+        self.tabella.resizeRowsToContents()
 
     def avvia_ricerca(self) -> None:
         """avvio ricerca GUI"""
@@ -93,53 +92,53 @@ class TorrentDownloaderGUI:
         self.t.search1377x_request(str(name_input))
         # populate tabel
         torrent = 1
-        self.tabella: QTableWidget = TorrentDownloaderGUI.window.findChild(
+        self.tabella: QTableWidget = self.window.findChild(
             QTableWidget, "tableWidget")
-        self.seleziona: QPushButton = TorrentDownloaderGUI.window.findChild(
+        self.seleziona: QPushButton = self.window.findChild(
             QPushButton, "select")
-        TorrentDownloaderGUI.seleziona.clicked.connect(
-            lambda: TorrentDownloaderGUI.get_selected_element(self))
-        TorrentDownloaderGUI.tabella.clearContents()
-        TorrentDownloaderGUI.tabella.setRowCount(0)
+        self.seleziona.clicked.connect(
+            lambda: self.get_selected_element())
+        self.tabella.clearContents()
+        self.tabella.setRowCount(0)
         QApplication.processEvents()
         for elem in self.t.torren_fields:
             pos = torrent - 1
-            TorrentDownloaderGUI.tabella.insertRow(pos)
-            TorrentDownloaderGUI.print_elem_gui(elem, pos)
+            self.tabella.insertRow(pos)
+            self.print_elem_gui(elem, pos)
             torrent += 1
 
     def get_selected_element(self) -> None:  # this self is TorrentDownloader
         """get list of selected row in GUI"""
         # GUI (first time only)
-        self.autoadd = TorrentDownloaderGUI.add.isChecked()
+        self.autoadd = self.add.isChecked()
         # get multiple selection
-        items = TorrentDownloaderGUI.tabella.selectedItems()
+        items = self.tabella.selectedItems()
         for item in items:
             # only 1 item in a row
             if item.column() == 1:
                 # start download with each selected row
-                self.selected_elem: torrentelem.TorrentElem = self.t.torren_fields[item.row()]
-                self.t.get_magnet(self.selected_elem.magnet, self.t.gui)
+                selected_elem: torrentelem.TorrentElem = self.t.torren_fields[item.row()]
+                selected_elem.get_magnet()
+                self.t.start(selected_elem.magnet)
 
-
-# Winow setup
-QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
-app = QApplication.instance()
-if app is None:
-    app = QApplication(sys.argv)
-rand = SystemRandom()
-icon = rand.randrange(1, 15)
-app.setWindowIcon(QIcon(f"Resources/icon_{icon}.png"))
-install_ui = 'Resources/install.ui'
-ui_file = QFile(install_ui)
-loader = QUiLoader()
-TorrentDownloaderGUI.window = loader.load(ui_file)
-TorrentDownloaderGUI.logo = TorrentDownloaderGUI.window.findChild(
-    QLabel, 'logo')
-TorrentDownloaderGUI.window.setWindowTitle('TorrentDownloader')
-pixmap = QPixmap('Resources/1280px-1337X_logo.svg.png')
-TorrentDownloaderGUI.logo.setPixmap(pixmap)
-ui_file.close()
-x = TorrentDownloaderGUI()
-TorrentDownloaderGUI.window.show()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+    rand = SystemRandom()
+    icon = rand.randrange(1, 15)
+    app.setWindowIcon(QIcon(f"Resources/icon_{icon}.png"))
+    install_ui = 'Resources/install.ui'
+    ui_file = QFile(install_ui)
+    loader = QUiLoader()
+    TorrentDownloaderGUI.window = loader.load(ui_file)
+    TorrentDownloaderGUI.logo = TorrentDownloaderGUI.window.findChild(
+        QLabel, 'logo')
+    TorrentDownloaderGUI.window.setWindowTitle('TorrentDownloader')
+    pixmap = QPixmap('Resources/1280px-1337X_logo.svg.png')
+    TorrentDownloaderGUI.logo.setPixmap(pixmap)
+    ui_file.close()
+    x = TorrentDownloaderGUI()
+    TorrentDownloaderGUI.window.show()
+    sys.exit(app.exec_())
