@@ -1,18 +1,20 @@
-'''GUI functions'''
+"""GUI functions"""
 
 import sys
 from random import SystemRandom
-import json
+import torrentelem
 from torrent import TorrentDownloader
+
 # text format
 bold_text = "\033[1m"
 red = "\x1b[31m"
 # GUI import
 try:
-    from PySide2.QtCore import QFile, QCoreApplication, Qt, QObject, QEvent
-    from PySide2.QtUiTools import QUiLoader
-    from PySide2.QtWidgets import QApplication, QLabel, QCheckBox, QPushButton, QLineEdit, QTableWidgetItem, QTableWidget
-    from PySide2.QtGui import QIcon, QPixmap, QKeyEvent
+    from PySide6.QtCore import QFile, QCoreApplication, Qt, QObject, QEvent
+    from PySide6.QtUiTools import QUiLoader
+    from PySide6.QtWidgets import QApplication, QLabel, QCheckBox, QPushButton, QLineEdit, QTableWidgetItem, \
+        QTableWidget
+    from PySide6.QtGui import QIcon, QPixmap, QKeyEvent
 except ModuleNotFoundError:
     bold_text = "\033[1m"
     red = "\x1b[31m"
@@ -21,25 +23,29 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 
-class TorrentDownloaderGUI():
-    '''Download Torrent GUI'''
+class TorrentDownloaderGUI:
+    """Download Torrent GUI"""
+    tabella = None
+    t = TorrentDownloader()
+    titolo: QLineEdit
+    cerca: QPushButton
+    add: QCheckBox
+    seleziona: QPushButton
+    tabella: QTableWidget
 
     def __init__(self) -> None:
-        '''initialize variables'''
+        """initialize variables"""
         self.autoadd = None
         self.selected_elem = None
-        self.seleziona = None
-        self.tabella = None
         selfw = self
-        TorrentDownloader.torrent_list = json.loads(
-            TorrentDownloader.json_torrent)
-        TorrentDownloader.setup(TorrentDownloader)
+        self.t.setup()
 
         class KeyPressEater(QObject):
-            '''event filter '''
+            """event filter """
+
             @staticmethod
             def eventFilter(widget, event: QKeyEvent) -> bool:
-                '''catch enter key'''
+                """catch enter key"""
                 if event.type() == QEvent.KeyPress:
                     key = event.key()
                     if key == Qt.Key_Return:
@@ -47,21 +53,19 @@ class TorrentDownloaderGUI():
                             selfw)
                         return True
                 return False
+
         TorrentDownloaderGUI.filtro = KeyPressEater()
-        TorrentDownloaderGUI.titolo: QLineEdit = TorrentDownloaderGUI.window.findChild(
-            QLineEdit, "titolo")
-        TorrentDownloaderGUI.cerca: QPushButton = TorrentDownloaderGUI.window.findChild(
-            QPushButton, "cerca")
-        TorrentDownloaderGUI.add: QCheckBox = TorrentDownloaderGUI.window.findChild(
-            QCheckBox, "add")
+        self.titolo = TorrentDownloaderGUI.window.findChild(QLineEdit, "titolo")
+        self.cerca = TorrentDownloaderGUI.window.findChild(QPushButton, "cerca")
+        self.add = TorrentDownloaderGUI.window.findChild(QCheckBox, "add")
         TorrentDownloaderGUI.cerca.clicked.connect(
             lambda: TorrentDownloaderGUI.avvia_ricerca(self))
         TorrentDownloaderGUI.titolo.installEventFilter(self.filtro)
 
     @staticmethod
-    def print_elem_gui(elem: dict, torrent: int) -> None:
-        '''insert torrent element in table'''
-        title_t = elem['name']
+    def print_elem_gui(elem: torrentelem.TorrentElem, torrent: int) -> None:
+        """insert torrent element in table"""
+        title_t = elem.name
         min_pos = 0
         max_pos = 70
         if max_pos < len(title_t):
@@ -69,51 +73,43 @@ class TorrentDownloaderGUI():
                 (title_t[min_pos:max_pos] + "\n" + title_t[max_pos:140])))
         else:
             TorrentDownloaderGUI.tabella.setItem(
-                torrent, 0, QTableWidgetItem((title_t)))
+                torrent, 0, QTableWidgetItem(title_t))
         TorrentDownloaderGUI.tabella.setItem(
-            torrent, 1, QTableWidgetItem(f"{str(elem['size'])} {elem['type']}"))
+            torrent, 1, QTableWidgetItem(f"{str(elem.size)} {elem.file_type}"))
         TorrentDownloaderGUI.tabella.setItem(
-            torrent, 2, QTableWidgetItem(elem['seed']))
+            torrent, 2, QTableWidgetItem(elem.seeders))
         TorrentDownloaderGUI.tabella.setItem(
-            torrent, 3, QTableWidgetItem(elem['leech']))
+            torrent, 3, QTableWidgetItem(elem.leecher))
         TorrentDownloaderGUI.tabella.setItem(
-            torrent, 4, QTableWidgetItem(elem['movie_type']))
+            torrent, 4, QTableWidgetItem(elem.file_type))
         TorrentDownloaderGUI.tabella.setItem(
-            torrent, 5, QTableWidgetItem(elem['date']))
+            torrent, 5, QTableWidgetItem(elem.date))
         TorrentDownloaderGUI.tabella.resizeColumnsToContents()
         TorrentDownloaderGUI.tabella.resizeRowsToContents()
 
     def avvia_ricerca(self) -> None:
-        '''avvio ricerca GUI'''
-        # reset to allow multiple search
-        TorrentDownloader.json_torrent = '''
-        {
-            "Torrent": [
-                ]
-        }
-        '''
+        """avvio ricerca GUI"""
         name_input = self.titolo.text()
-        TorrentDownloader.search1377x_request(
-            TorrentDownloader, str(name_input))
+        self.t.search1377x_request(str(name_input))
         # populate tabel
         torrent = 1
-        TorrentDownloaderGUI.tabella: QTableWidget = TorrentDownloaderGUI.window.findChild(
+        self.tabella: QTableWidget = TorrentDownloaderGUI.window.findChild(
             QTableWidget, "tableWidget")
-        TorrentDownloaderGUI.seleziona: QPushButton = TorrentDownloaderGUI.window.findChild(
+        self.seleziona: QPushButton = TorrentDownloaderGUI.window.findChild(
             QPushButton, "select")
         TorrentDownloaderGUI.seleziona.clicked.connect(
-            lambda: TorrentDownloaderGUI.get_selected_element(TorrentDownloader))
+            lambda: TorrentDownloaderGUI.get_selected_element(self))
         TorrentDownloaderGUI.tabella.clearContents()
         TorrentDownloaderGUI.tabella.setRowCount(0)
         QApplication.processEvents()
-        for elem in TorrentDownloader.torrent_list['Torrent']:
+        for elem in self.t.torren_fields:
             pos = torrent - 1
             TorrentDownloaderGUI.tabella.insertRow(pos)
             TorrentDownloaderGUI.print_elem_gui(elem, pos)
             torrent += 1
 
     def get_selected_element(self) -> None:  # this self is TorrentDownloader
-        '''get list of selected row in GUI'''
+        """get list of selected row in GUI"""
         # GUI (first time only)
         self.autoadd = TorrentDownloaderGUI.add.isChecked()
         # get multiple selection
@@ -122,10 +118,8 @@ class TorrentDownloaderGUI():
             # only 1 item in a row
             if item.column() == 1:
                 # start download with each selected row
-                self.selected_elem = TorrentDownloader.torrent_list[
-                    'Torrent'][item.row()]
-                TorrentDownloader.get_magnet(
-                    TorrentDownloader, self.selected_elem['link'], True)
+                self.selected_elem: torrentelem.TorrentElem = self.t.torren_fields[item.row()]
+                self.t.get_magnet(self.selected_elem.magnet, self.t.gui)
 
 
 # Winow setup

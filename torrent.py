@@ -1,4 +1,4 @@
-'''Common functions'''
+"""Common functions"""
 import signal
 import subprocess
 import sys
@@ -27,8 +27,8 @@ cyan = "\x1b[36m"
 white = "\x1b[37m"
 
 
-class TorrentDownloader():
-    '''Add magnet link to transmission or other torrent client'''
+class TorrentDownloader:
+    """Add magnet link to transmission or other torrent client"""
 
     def __init__(self) -> None:
         self.torrent_pages = None
@@ -47,12 +47,12 @@ class TorrentDownloader():
 
     @classmethod
     def sig_handler(cls, _signo, _stack_frame) -> None:
-        '''Catch ctr+c signal'''
+        """Catch ctr+c signal"""
         print("\n")
         sys.exit(0)
 
     def read_config(self) -> None:
-        '''read config.json'''
+        """read config.json"""
         # inizialize with default value
         self.torrent_pages: int = 3
         self.autoadd: bool = True
@@ -96,7 +96,7 @@ class TorrentDownloader():
         self.torren_fields.sort(key=lambda x: x.size, reverse=True)
 
     def search1337x(self, req: requests.models.Response) -> None:
-        '''Parsing function'''
+        """Parsing function"""
         # extracting data in json format
         for parsed in BeautifulSoup(req.text, "html.parser").findAll("tr"):
             try:
@@ -126,7 +126,7 @@ class TorrentDownloader():
     #   TorrentDownloader.json_torrent = json.dumps(self.torrent_list)
 
     def search1377x_request(self, name_s: str) -> None:
-        '''Request to the torrent site'''
+        """Request to the torrent site"""
         # sending get request and saving the response as response object
         max_elem = self.torrent_pages
         for elem in range(1, max_elem + 1):
@@ -142,7 +142,7 @@ class TorrentDownloader():
             self.search1337x(req=req)
 
     def start(self, magnet_link: str) -> bool:
-        '''start magnet'''
+        """start magnet"""
         if self.autoadd:
             # avvio il magnet
             if self.custom_cmd:
@@ -186,7 +186,7 @@ class TorrentDownloader():
         return True
 
     def get_magnet(self, link: str, gui: bool) -> None:
-        '''function to get magnet link'''
+        """function to get magnet link"""
         self.gui = gui
         pattern = "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$"
         if not re.match(pattern=pattern, string=link):
