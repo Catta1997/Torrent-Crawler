@@ -4,6 +4,9 @@ import subprocess
 import sys
 import re
 import json
+
+import torrentelem
+
 try:
     import requests
     from bs4 import BeautifulSoup
@@ -34,22 +37,11 @@ class TorrentDownloader():
         self.sort_by = None
         self.gui = None
 
-    json_torrent = '''
-            {
-                "Torrent": [
-                    ]
-            }
-            '''
+    torren_fields = []
 
     def setup(self) -> None:
-        '''inizitialize variables'''
-        self.json_torrent = '''
-            {
-                "Torrent": [
-                    ]
-            }
-            '''
-        self.read_config(self)
+        """inizitialize variables"""
+        self.read_config()
         signal.signal(signal.SIGTERM, TorrentDownloader.sig_handler)
         signal.signal(signal.SIGINT, TorrentDownloader.sig_handler)
 
@@ -73,50 +65,65 @@ class TorrentDownloader():
             self.custom_cmd: str = tmp['custom_command']
             self.sort_by: str = tmp['sort_by']
         except FileNotFoundError:
-            print(
-                f"{ red  }config.json not found, using default value{reset_clr}")
+            print(f"{red}config.json not found, using default value{reset_clr}")
+
+    def solidtorrents_request(self, name_s: str) -> None:
+        """Request to the torrent site"""
+        # sending get request and saving the response as response object
+        max_elem = self.torrent_pages
+        for elem in range(1, max_elem + 1):
+            url = f"https://solidtorrents.to/search?q={name_s}&page={elem}/"
+            req = requests.get(url=url, params={})
+            self.searchSolidtorrents(req)
+
+    def searchSolidtorrents(self, req: requests.models.Response) -> None:
+        for parsed in BeautifulSoup(req.text, "html.parser").find_all(
+                "li", {"class": "card search-result my-2"}
+        ):
+            stats_div = parsed.find("div", {"class": "stats"})
+            x = stats_div.find_all("div")
+            name = parsed.find("a").text
+            size = float(re.sub(r"^\W*|\W*$", "", (x[1].text))[0])
+            seed = re.sub(r"^\W*|\W*$", "", x[2].text)
+            leech = re.sub(r"^\W*|\W*$", "", x[3].text)
+            movie_type: ""
+            type_t = re.sub(r"^\W*|\W*$", "", x[1].text).split(" ", 1)
+            date = re.sub(r"^\W*|\W*$", "", x[4].text)
+            link = parsed.find("a", {"class": "dl-magnet"})["href"]
+            temp = torrentelem.TorrentElem(name=name, size=size, seeders=seed, leecher=leech, date=date,
+                                           file_type=type_t[0], magnet=link)
+            self.torren_fields.append(temp)
+        self.torren_fields.sort(key=lambda x: x.size, reverse=True)
 
     def search1337x(self, req: requests.models.Response) -> None:
         '''Parsing function'''
         # extracting data in json format
-        self.torrent_list = json.loads(TorrentDownloader.json_torrent)
-        for parsed in BeautifulSoup(req.text, "html.parser").findAll('tr'):
+        for parsed in BeautifulSoup(req.text, "html.parser").findAll("tr"):
             try:
-                size = (parsed.find('td', attrs={
-                        'class': 'coll-4'}).get_text())
-                leech = (parsed.find('td', attrs={
-                         'class': 'coll-3'}).get_text())
-                date_t = (parsed.find(
-                    'td', attrs={'class': 'coll-date'}).get_text())
-                seed = (parsed.find('td', attrs={
-                        'class': 'coll-2'}).get_text())
-                elem = parsed.find('td', attrs={'class': 'coll-1'})
-                for tit in elem.find_all('a', href=True):
-                    link = tit['href']
+                type_torr = ""
+                title = ""
+                link = ""
+                size = parsed.find("td", attrs={"class": "coll-4"}).get_text()
+                leech = parsed.find("td", attrs={"class": "coll-3"}).get_text()
+                date_t = parsed.find("td", attrs={"class": "coll-date"}).get_text()
+                seed = parsed.find("td", attrs={"class": "coll-2"}).get_text()
+                elem = parsed.find("td", attrs={"class": "coll-1"})
+                for tit in elem.find_all("a", href=True):
+                    link = tit["href"]
                     title = tit.text
                     if "/sub/" in link:
                         type_torr = link.split("/")[3]
                 if len(title) > 1:
-                    temp = {
-                        'name': title,
-                        'size': float(size.split(" ")[0]),
-                        'seed': seed,
-                        'leech': leech,
-                        'movie_type': type_torr,
-                        'type': size.split(" ")[1],
-                        'date': date_t,
-                        'link': 'https://www.1337xx.to' + link
-                    }
-                    self.torrent_list['Torrent'].append(temp)
+                    temp = torrentelem.TorrentElem(name=title, size=float(size.split(" ")[0]), seeders=seed, leecher=leech,
+                                                   date=date_t, file_type=type_torr, magnet=link)
+                    self.torren_fields.append(temp)
             except AttributeError:
                 continue
 
             # create a json with torrent info
-        TorrentDownloader.json_torrent = json.dumps(self.torrent_list)
-        self.torrent_list['Torrent'] = sorted(
-            self.torrent_list['Torrent'], key=lambda pos: pos[self.sort_by], reverse=True)  # sort list with given key selected in config.json
-        # update json with sorted json
-        TorrentDownloader.json_torrent = json.dumps(self.torrent_list)
+            self.torren_fields.sort(key=lambda x: x.size, reverse=True)
+
+    #   TorrentDownloader.json_torrent = json.dumps(self.torrent_list)
 
     def search1377x_request(self, name_s: str) -> None:
         '''Request to the torrent site'''
@@ -132,7 +139,7 @@ class TorrentDownloader():
                         f"{red}No torrent founded for \"{name_s}\"{reset_clr}")
                     print("")
                     sys.exit(0)
-            self.search1337x(self,req)
+            self.search1337x(req=req)
 
     def start(self, magnet_link: str) -> bool:
         '''start magnet'''
@@ -181,20 +188,27 @@ class TorrentDownloader():
     def get_magnet(self, link: str, gui: bool) -> None:
         '''function to get magnet link'''
         self.gui = gui
-        headers = {
-            'User-Agent': 'Mozilla/5.0'
-        }
-        req = requests.get(link, headers=headers)
-        # extracting data in json format
-        print("req")
-        parsed_html = BeautifulSoup(req.text, "html.parser")
-        magnet_link = ''
-        for parsed in parsed_html.findAll('li'):
-            # search magnet link using regex
-            for x in parsed.find_all(href=re.compile("^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$")):
-                magnet_link = x['href']
-        if magnet_link != '':
-            if not TorrentDownloader.start(TorrentDownloader, magnet_link):
+        pattern = "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$"
+        if not re.match(pattern=pattern, string=link):
+            """function to get magnet link"""
+            headers = {"User-Agent": "Mozilla/5.0"}
+            req = requests.get(link, headers=headers)
+            # extracting data in json format
+            print("req")
+            parsed_html = BeautifulSoup(req.text, "html.parser")
+            magnet_link = ""
+            for parsed in parsed_html.findAll("li"):
+                # search magnet link using regex
+                for x in parsed.find_all(
+                        href=re.compile(pattern)
+                ):
+                    magnet_link = x["href"]
+        else:
+            magnet_link = link
+
+    def start_download(self, magnet_link: str) -> None:
+        if magnet_link != "":
+            if not TorrentDownloader.start(self, magnet_link):
                 if self.gui:
                     from gui import TorrentDownloaderGUI
                     TorrentDownloader.show_magnet(magnet_link)
@@ -204,14 +218,15 @@ class TorrentDownloader():
                     print(
                         f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
         else:
-            print(
-                f"{red}No Magnet Link Found{reset_clr}\n")
-    
-    def show_magnet(str_magnet: str) -> None:
-        '''show magnet link on window'''
-        from PySide2.QtCore import QFile
-        from PySide2.QtUiTools import QUiLoader
-        from PySide2.QtWidgets import QTextEdit
+            print(f"{red}No Magnet Link Found{reset_clr}\n")
+
+    @staticmethod
+    def show_magnet(self, str_magnet: str) -> None:
+        """show magnet link on window"""
+        from PySide6.QtCore import QFile
+        from PySide6.QtUiTools import QUiLoader
+        from PySide6.QtWidgets import QTextEdit
+
         loader = QUiLoader()
         magnet_ui = 'Resources/show.ui'
         ui_magnet = QFile(magnet_ui)
