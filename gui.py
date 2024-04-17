@@ -51,6 +51,7 @@ class TorrentDownloaderGUI:
                         selfw.avvia_ricerca()
                         return True
                 return False
+
         self.filtro = KeyPressEater()
         self.titolo = self.window.findChild(QLineEdit, "titolo")
         self.cerca = self.window.findChild(QPushButton, "cerca")
@@ -130,7 +131,6 @@ class TorrentDownloaderGUI:
                 selected_elem.get_magnet()
                 self.t.start(selected_elem.magnet)
                 self.show_magnet(selected_elem.magnet)
-
 
 
 if __name__ == "__main__":

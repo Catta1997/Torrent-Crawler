@@ -20,18 +20,17 @@ class TorrentDownloaderCLI:
     t = TorrentDownloader()
 
     def __init__(self) -> None:
-        self.t.setup()
+        self.t.setup(gui=False)
         name_input = "fast and furious"
-        TorrentDownloader.search1377x_request(
-            self.t, str(name_input))
+        self.t.search1377x_request(str(name_input))
         # print list
         torrent = 1
-        for elem in TorrentDownloader.torren_fields:
+        for elem in self.t.torren_fields:
             # write _____________
             print(underscore + ' ' * 120 + reset_clr + '\n')
             print(
                 f" {bold_text}Torrent {torrent} :{reset_clr}")
-            TorrentDownloaderCLI.print_elem(elem)
+            self.print_elem(elem)
             torrent += 1
         self.choose()
 
@@ -67,7 +66,7 @@ class TorrentDownloaderCLI:
             found = 1
             number = 0  # indice di un array
             selected_elem: torrentelem.TorrentElem = self.t.torren_fields[number]
-            TorrentDownloaderCLI.print_elem(selected_elem)
+            self.print_elem(selected_elem)
             conf = "y"
             while conf.lower() not in ['y', 'n']:
                 conf = input("\ny to confirm, n to repeat: ")
@@ -75,8 +74,9 @@ class TorrentDownloaderCLI:
                 found = 0
             elif conf.lower() == 'y':
                 # controllo che number sia una scelta valida:
-                if 0 <= number < len(TorrentDownloader.torren_fields):
-                    TorrentDownloader.get_magnet(self.t, selected_elem.magnet, False)
+                if 0 <= number < len(self.t.torren_fields):
+                    selected_elem.get_magnet()
+                    self.t.start(selected_elem.magnet)
                 else:
                     print(
                         f"{red}Not Valid{reset_clr}")
