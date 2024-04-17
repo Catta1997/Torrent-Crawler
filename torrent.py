@@ -4,7 +4,6 @@ import subprocess
 import sys
 import re
 import json
-
 import torrentelem
 
 try:
@@ -180,36 +179,14 @@ class TorrentDownloader:
                 f'\n{green}Success{reset_clr}')
             return True
         # no autoadd
-        print("else")
-        if self.gui:
-            print("if")
-            self.show_magnet(magnet_link)
-        else:
+        if not self.gui:
             print(
                 f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
         return True
 
-    def show_magnet(self, str_magnet: str) -> None:
-        """show magnet link on window"""
-        from PySide6.QtCore import QFile
-        from PySide6.QtUiTools import QUiLoader
-        from PySide6.QtWidgets import QTextEdit
 
-        loader = QUiLoader()
-        magnet_ui = 'Resources/show.ui'
-        ui_magnet = QFile(magnet_ui)
-        self.magnet_window = loader.load(magnet_ui)
-        ui_magnet.close()
-        print("textedit 2")
-        text: QTextEdit = self.magnet_window.findChild(
-            QTextEdit, "magnet_link")
-        text.insertPlainText(str_magnet)
-        print("open 2")
-        self.magnet_window.show()
-        TorrentDownloader.widgetList.append(self.magnet_window)
 
 
 
 if __name__ == "__main__":
-    TorrentDownloader.widgetList = []
     print(f"{red} Please run terminal.py or gui.py{reset_clr}")

@@ -43,17 +43,14 @@ class TorrentDownloaderGUI:
         class KeyPressEater(QObject):
             """event filter """
 
-            @staticmethod
-            def eventFilter(widget, event: QKeyEvent) -> bool:
+            def eventFilter(self, widget, event: QKeyEvent) -> bool:
                 """catch enter key"""
                 if event.type() == QEvent.KeyPress:
                     key = event.key()
                     if key == Qt.Key_Return:
-                        self.avvia_ricerca(
-                            selfw)
+                        selfw.avvia_ricerca()
                         return True
                 return False
-
         self.filtro = KeyPressEater()
         self.titolo = self.window.findChild(QLineEdit, "titolo")
         self.cerca = self.window.findChild(QPushButton, "cerca")
@@ -107,6 +104,18 @@ class TorrentDownloaderGUI:
             self.print_elem_gui(elem, pos)
             torrent += 1
 
+    def show_magnet(self, str_magnet: str) -> None:
+        """show magnet link on window"""
+        from PySide6.QtCore import QFile
+        from PySide6.QtUiTools import QUiLoader
+        from PySide6.QtWidgets import QTextEdit
+        text: QTextEdit = self.magnet_window.findChild(
+            QTextEdit, "magnet_link")
+        text.insertPlainText(str_magnet)
+        text.insertPlainText("\n")
+        text.insertPlainText("\n")
+        self.magnet_window.show()
+
     def get_selected_element(self) -> None:  # this self is TorrentDownloader
         """get list of selected row in GUI"""
         # GUI (first time only)
@@ -120,6 +129,9 @@ class TorrentDownloaderGUI:
                 selected_elem: torrentelem.TorrentElem = self.t.torren_fields[item.row()]
                 selected_elem.get_magnet()
                 self.t.start(selected_elem.magnet)
+                self.show_magnet(selected_elem.magnet)
+
+
 
 if __name__ == "__main__":
     QCoreApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
@@ -139,6 +151,12 @@ if __name__ == "__main__":
     pixmap = QPixmap('Resources/1280px-1337X_logo.svg.png')
     TorrentDownloaderGUI.logo.setPixmap(pixmap)
     ui_file.close()
+
+    loader = QUiLoader()
+    magnet_ui = 'Resources/show.ui'
+    ui_magnet = QFile(magnet_ui)
+    TorrentDownloaderGUI.magnet_window = loader.load(magnet_ui)
+    ui_magnet.close()
     x = TorrentDownloaderGUI()
     TorrentDownloaderGUI.window.show()
     sys.exit(app.exec_())

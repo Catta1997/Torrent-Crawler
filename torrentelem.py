@@ -33,7 +33,6 @@ class TorrentElem:
             headers = {"User-Agent": "Mozilla/5.0"}
             req = requests.get(self.link, headers=headers)
             # extracting data in json format
-            print("req")
             parsed_html = BeautifulSoup(req.text, "html.parser")
             self.magnet = ""
             for parsed in parsed_html.findAll("li"):
@@ -44,5 +43,3 @@ class TorrentElem:
                     self.magnet = x["href"]
         else:
             self.magnet = self.link
-        print(self.link)
-        print(self.magnet)
