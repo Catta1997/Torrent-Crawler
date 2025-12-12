@@ -78,6 +78,7 @@ class TorrentDownloader:
             print(f"{ red  }config.json not found, using default value{reset_clr}")
 
     def solidtorrents_request(self, name_s: str) -> None:
+        return 
         """Request to the torrent site"""
         # sending get request and saving the response as response object
         max_elem = self.torrent_pages
@@ -161,8 +162,11 @@ class TorrentDownloader:
         # sending get request and saving the response as response object
         max_elem = self.torrent_pages
         for elem in range(1, max_elem + 1):
+            headers = {
+                'User-Agent': 'PostmanRuntime/7.49.1'
+            }
             url = f"https://www.1377x.to/search/{name_s}/{elem}/"
-            req = requests.get(url=url, params={})
+            req = requests.get(url=url, headers=headers)
             if elem == 1:
                 parsed_html = BeautifulSoup(req.text, "html.parser")
                 if len(parsed_html.findAll("tr")) == 1:
