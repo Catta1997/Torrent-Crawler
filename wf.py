@@ -30,19 +30,19 @@ class TorrentDownloaderCLI():
         torrent = 1
         TorrentDownloader.torrent_list = json.loads(
             TorrentDownloader.json_torrent)
-        for elem in TorrentDownloader.torrent_list['Torrent']:
+        for elem in TorrentDownloader.torrent_list["Torrent"]:
             # write _____________
             print(underscore + ' ' * 120 + reset_clr+'\n')
             print(
                 f" {bold_text}Torrent {torrent} :{reset_clr}")
             TorrentDownloaderCLI.print_elem(elem)
             torrent += 1
-        self.choose()
+        self.choose(TorrentDownloader.torrent_list["Torrent"])
 
     @staticmethod
     def print_elem(elem: dict) -> None:
         '''Print torrent element'''
-        title_t = elem['name']
+        title_t = elem["name"]
         min_pos = 0
         max_pos = 95
         print(
@@ -52,17 +52,17 @@ class TorrentDownloaderCLI():
             max_pos += 95
             print(f" {cyan}       {title_t[min_pos:max_pos]}{reset_clr}")
         print(
-            f" {red}DATE: {elem['date']}{reset_clr}")
+            f" {red}DATE: {elem["date"]}{reset_clr}")
         print(
-            f" {green}DIM: {str(elem['size'])} {elem['type']}{reset_clr}")
+            f" {green}DIM: {str(elem["size"])} {elem["type"]}{reset_clr}")
         print(
-            f" {yellow}SEED: {elem['seed']}{reset_clr}")
+            f" {yellow}SEED: {elem["seed"]}{reset_clr}")
         print(
-            f" {white}LEECH: {elem['leech']}{reset_clr}")
+            f" {white}LEECH: {elem["leech"]}{reset_clr}")
         print(
-            f" {magenta}TYPE: {elem['movie_type']}{reset_clr}")
+            f" {magenta}TYPE: {elem["movie_type"]}{reset_clr}")
 
-    def choose(self) -> None:
+    def choose(self, torrentList) -> None:
         '''Select torrent'''
         # write _____________
         print(underscore+' ' * 120+reset_clr+'\n')
@@ -70,18 +70,16 @@ class TorrentDownloaderCLI():
         while found == 0:
             found = 1
             number = 0  # indice di un array
-            self.selected_elem = TorrentDownloader.torrent_list['Torrent'][number]
-            TorrentDownloaderCLI.print_elem(self.selected_elem)
+            TorrentDownloaderCLI.print_elem(torrentList[number])
             conf = "y"
-            while conf.lower() not in ['y', 'n']:
+            while conf.lower() not in ["y", "n"]:
                 conf = input("\ny to confirm, n to repeat: ")
             if conf.lower() == 'n':
                 found = 0
             elif conf.lower() == 'y':
                 # controllo che number sia una scelta valida:
-                if 0 <= number < len(TorrentDownloader.torrent_list['Torrent']):
-                    TorrentDownloader.get_magnet(TorrentDownloader,
-                        self.selected_elem['link'], False)
+                if 0 <= number < len(torrentList):
+                    TorrentDownloader.get_magnet(TorrentDownloader,torrentList[number]["link"], False)
                 else:
                     print(
                         f"{red}Not Valid{reset_clr}")
