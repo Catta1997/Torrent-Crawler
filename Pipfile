@@ -10,4 +10,4 @@ beautifulsoup4 = "==4.9.1"
 requests = "==2.31.0"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
