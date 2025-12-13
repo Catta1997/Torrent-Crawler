@@ -163,13 +163,18 @@ class TorrentDownloader:
         max_elem = self.torrent_pages
         for elem in range(1, max_elem + 1):
             headers = {
-                "User-Agent": "Mozilla/5.0",
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
                 "Accept": "text/html,application/xhtml+xml",
                 "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8",
-                "Referer": "https://google.com"
+                "Referer": "https://www.google.com/"
             }
             url = f"https://www.1377x.to/search/{name_s}/{elem}/"
             req = requests.get(url=url, headers=headers)
+            print(req.status_code)
             if elem == 1:
                 parsed_html = BeautifulSoup(req.text, "html.parser")
                 if len(parsed_html.findAll("tr")) == 1:
@@ -221,9 +226,7 @@ class TorrentDownloader:
             print(f"\n{green}Success{reset_clr}")
             return True
         # no autoadd
-        print("else")
         if self.gui:
-            print("if")
             TorrentDownloader.show_magnet(magnet_link)
         else:
             print(f"\nMagnet:{red}{magnet_link}{reset_clr}\n")
@@ -235,20 +238,24 @@ class TorrentDownloader:
         if not re.match(pattern=pattern, string=link):
             """function to get magnet link"""
             headers = {
-                "User-Agent": "Mozilla/5.0",
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
                 "Accept": "text/html,application/xhtml+xml",
                 "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8",
-                "Referer": "https://google.com"
+                "Referer": "https://www.google.com/"
             }
             req = requests.get(link, headers=headers)
+            print(req.status_code)
             # extracting data in json format
-            print("req")
             parsed_html = BeautifulSoup(req.text, "html.parser")
             magnet_link = ""
             for parsed in parsed_html.findAll("li"):
                 # search magnet link using regex
                 for x in parsed.find_all(
-                    href=re.compile("^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$")
+                    href=re.compile(r"^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$")
                 ):
                     magnet_link = x["href"]
         else:
