@@ -163,7 +163,10 @@ class TorrentDownloader:
         max_elem = self.torrent_pages
         for elem in range(1, max_elem + 1):
             headers = {
-                'User-Agent': 'PostmanRuntime/7.49.1'
+                "User-Agent": "Mozilla/5.0",
+                "Accept": "text/html,application/xhtml+xml",
+                "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8",
+                "Referer": "https://google.com"
             }
             url = f"https://www.1377x.to/search/{name_s}/{elem}/"
             req = requests.get(url=url, headers=headers)
@@ -231,7 +234,12 @@ class TorrentDownloader:
         pattern = "^magnet:\?xt=urn:btih:[0-9a-fA-F]{40,}.*$"
         if not re.match(pattern=pattern, string=link):
             """function to get magnet link"""
-            headers = {"User-Agent": "Mozilla/5.0"}
+            headers = {
+                "User-Agent": "Mozilla/5.0",
+                "Accept": "text/html,application/xhtml+xml",
+                "Accept-Language": "it-IT,it;q=0.9,en-US;q=0.8",
+                "Referer": "https://google.com"
+            }
             req = requests.get(link, headers=headers)
             # extracting data in json format
             print("req")
