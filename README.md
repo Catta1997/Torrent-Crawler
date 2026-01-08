@@ -1,6 +1,5 @@
 # Torrent-Crawler
 
-[![Python application](https://github.com/Catta1997/Torrent-Crawler/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/Catta1997/Torrent-Crawler/actions/workflows/python-app.yml)
 ![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/Catta1997/Torrent-Crawler)
 ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/Catta1997/Torrent-Crawler/requests?color=yellow)
 ![GitHub Pipenv locked dependency version (branch)](https://img.shields.io/github/pipenv/locked/dependency-version/Catta1997/Torrent-Crawler/beautifulsoup4?color=yellow)
