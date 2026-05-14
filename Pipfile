@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 beautifulsoup4 = "==4.9.1"
-requests = "==2.32.4"
+requests = "==2.33.0"
 
 [requires]
 python_version = "3.12"
