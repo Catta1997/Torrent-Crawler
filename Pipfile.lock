@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5ca576ea3ccc1b8a21d288fa25c2a4ef036626ae2567375d226aa2489311cdde"
+            "sha256": "a496e57388b48f51ab06001d66cb1633e1439d0c0632c45c3608ff66befbcb46"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,12 +18,12 @@
     "default": {
         "beautifulsoup4": {
             "hashes": [
-                "sha256:73cc4d115b96f79c7d77c1c7f7a0a8d4c57860d1041df407dd1aae7f07a77fd7",
-                "sha256:a6237df3c32ccfaee4fd201c8f5f9d9df619b93121d01353a64a73ce8c6ef9a8",
-                "sha256:e718f2342e2e099b640a34ab782407b7b676f47ee272d6739e60b8ea23829f2c"
+                "sha256:288e3ca7d54b06f2ac191970bc275c1939cb46d450b255bf6718b04aa37ab4f7",
+                "sha256:d6f88de62e1d4e38ecb1077eb9724cd0eff29d2a08ca16a401e9b9e93f117cf9"
             ],
             "index": "pypi",
-            "version": "==4.9.1"
+            "markers": "python_full_version >= '3.7.0'",
+            "version": "==4.15.0"
         },
         "certifi": {
             "hashes": [
@@ -230,12 +230,19 @@
         },
         "soupsieve": {
             "hashes": [
-                "sha256:a2b2c76d67df2382d245409fd71e321a571717e58463efa32ace87dcadac2c12",
-                "sha256:acee8417325c5653e1377dc31eccad59eb82cbc65942afe6174c53b3aaad63fc"
+                "sha256:8412826614f9c632227067d0985aeb9f584bd15efc852955430e097a9fe7afbf",
+                "sha256:924fab84ae21604c19e175e1f39815eb6fa83ba23836e09e9de180925e5bc4c0"
             ],
-            "index": "pypi",
-            "markers": "python_version >= '3.10'",
-            "version": "==2.9"
+            "markers": "python_full_version >= '3.11.5'",
+            "version": "==3.0.4"
+        },
+        "typing-extensions": {
+            "hashes": [
+                "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+                "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5"
+            ],
+            "markers": "python_version >= '3.9'",
+            "version": "==4.16.0"
         },
         "urllib3": {
             "hashes": [
