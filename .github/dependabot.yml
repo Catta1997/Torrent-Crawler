@@ -5,7 +5,7 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "pip" # Gestisce i file Pipfile, Pipfile.lock e requirements.txt
+    directory: "/" # Posizione in cui si trovano i file manifest
     schedule:
       interval: "weekly"
